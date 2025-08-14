@@ -9,11 +9,11 @@ export default function PageHeading({ children }) {
                 fontWeight: 'bold',
                 color: 'primary.main',
                 fontSize: {
-                    xs: '1.5rem',  // mobile
-                    sm: '1.75rem',
-                    md: '2rem',
-                    lg: '2rem',
-                    xl: '2rem',
+                    xs: '1.2rem',  // mobile
+                    sm: '1.3rem',
+                    md: '1.4rem',
+                    lg: '1.6rem',
+                    xl: '1.7rem',
                 },
             }}
         >

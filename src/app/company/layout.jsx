@@ -1,47 +1,69 @@
+// app/(admin)/layout.jsx  (or /admin/layout.jsx)
 "use client"
+import React, { useEffect, useState } from 'react'
 import { USERTYPE } from '@/lib/constants';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useRouter } from 'next/navigation';
-import React, { useEffect } from 'react'
+import CLayoutDashboard from '@/components/dashboard/company/CLayoutDashboard';
 
-function layout({ children }) {
+function getTokenExpiry(token) {
+    try {
+        const payloadBase64 = token.split(".")[1];
+        const decoded = atob(payloadBase64.replace(/-/g, "+").replace(/_/g, "/"));
+        const obj = JSON.parse(decoded);
+        console.log(obj)
+        return obj.exp;
+    } catch {
+        return null;
+    }
+}
 
+export default function AdminLayout({ children }) {
     const router = useRouter();
-    const { user, initializeAuth } = useAuthStore();
+    const { user, initializeAuth, clearAuth } = useAuthStore();
 
-    // initializing auth
     useEffect(() => {
         initializeAuth();
     }, [initializeAuth])
 
     useEffect(() => {
-        // run only on client
-        const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+        setTimeout(async () => {
+            const storedAccess = useAuthStore.getState().accessToken;
+            const storedRefresh = useAuthStore.getState().refreshToken;
 
-        // If we have a user, validate role immediately
-        if (user) {
-            const allowed = [USERTYPE.COMPANY]
-            if (!allowed.includes(user.role)) {
-                // unauthorized
-                setTimeout(() => {
-                    alert('You are not authorized to access this page!')
-                    router.replace('/')
-                }, 100)
+            // If either token is missing, we cannot proceed
+            if (!storedAccess || !storedRefresh) {
+                clearAuth();
+                router.replace("/");
+                return;
             }
-            return
-        }
 
-        // If there's no user but also no token -> definitely not logged in
-        if (!user && !token) {
-            router.replace('/')
-        }
+            if (user) {
+                const allowed = [USERTYPE.COMPANY]
+                if (!allowed.includes(user.role)) {
+                    // unauthorized
+                    setTimeout(() => {
+                        alert('You are not authorized to access this page!')
+                        router.replace('/')
+                    }, 100)
+                }
+                return;
+            }
 
-        // If !user but token exists -> allow initializeAuth() time to set user
-    }, [user, router])
+            // Check access token expiry
+            // const exp = getTokenExpiry(storedAccess);
+            // const nowSec = Math.floor(Date.now() / 1000);
+
+            // if (exp && exp > nowSec) {
+            //     // Access token still valid
+            //     setCheckingAuth(false);
+            // }
+        }, 0);
+    }, [user, router, clearAuth])
 
     return (
-        <div>{children}</div>
+        <CLayoutDashboard>
+            {children}
+        </CLayoutDashboard>
     )
 }
-
-export default layout

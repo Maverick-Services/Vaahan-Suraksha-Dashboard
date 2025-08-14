@@ -40,11 +40,15 @@ import {
     People as CustomerIcon,
     TwoWheeler as RiderIcon,
 } from '@mui/icons-material'
-import LogoutButton from '../auth/LogoutButton'
+
+import GroupIcon from '@mui/icons-material/Group'; // Members
+import SubscriptionsIcon from '@mui/icons-material/Subscriptions'; // My Subscriptions
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'; // Profile
+import LogoutButton from '@/components/auth/LogoutButton'
 
 const drawerWidth = 260
 
-export default function Sidebar({ variant = 'permanent', open = true, onClose }) {
+export default function CSidebar({ variant = 'permanent', open = true, onClose }) {
     const router = useRouter();
     const pathname = usePathname() || '/'
     const [openMenus, setOpenMenus] = useState({})
@@ -52,25 +56,24 @@ export default function Sidebar({ variant = 'permanent', open = true, onClose })
     const isMenuOpen = Boolean(anchorEl)
 
     const sections = [
-        { label: 'Dashboard', icon: <DashboardIcon />, path: '/admin' },
-        {
-            label: 'Users',
-            icon: <UsersIcon />,
-            expandable: true,
-            children: [
-                { label: 'Admins', path: '/admin/users/admins', icon: <AdminIcon fontSize="small" /> },
-                { label: 'Employees', path: '/admin/users/employees', icon: <EmployeeIcon fontSize="small" /> },
-                { label: 'Customers', path: '/admin/users/customers', icon: <CustomerIcon fontSize="small" /> },
-                { label: 'Riders', path: '/admin/users/riders', icon: <RiderIcon fontSize="small" /> },
-                { label: 'Companies', path: '/admin/users/companies', icon: <CompanyIcon fontSize="small" /> },
-            ],
-        },
-        { label: 'Brands', icon: <BrandsIcon />, path: '/admin/brands' },
-        { label: 'Car Models', icon: <CarIcon />, path: '/admin/carModels' },
-        { label: 'Products', icon: <ProductIcon />, path: '/admin/products' },
-        { label: 'Services', icon: <ServiceIcon />, path: '/admin/services' },
-        { label: 'Subscriptions', icon: <SubscriptionIcon />, path: '/admin/subscriptions' },
-        { label: 'Settings', icon: <SettingsIcon />, path: '/admin/settings' },
+        { label: 'Dashboard', icon: <DashboardIcon />, path: '/company' },
+        { label: 'Members', icon: <GroupIcon />, path: '/company/members' },
+        { label: 'My Subscriptions', icon: <CarIcon />, path: '/company/mySubscriptions' },
+        { label: 'Profile', icon: <AccountCircleIcon />, path: '/company/profile' }
+        // {
+        //     label: 'Users',
+        //     icon: <UsersIcon />,
+        //     expandable: true,
+        //     children: [
+        //         { label: 'Admins', path: '/admin/users/admins', icon: <AdminIcon fontSize="small" /> },
+        //         { label: 'Employees', path: '/admin/users/employees', icon: <EmployeeIcon fontSize="small" /> },
+        //         { label: 'Customers', path: '/admin/users/customers', icon: <CustomerIcon fontSize="small" /> },
+        //         { label: 'Riders', path: '/admin/users/riders', icon: <RiderIcon fontSize="small" /> },
+        //         { label: 'Companies', path: '/admin/users/companies', icon: <CompanyIcon fontSize="small" /> },
+        //     ],
+        // },,
+        // { label: 'Products', icon: <ProductIcon />, path: '/admin/products' },
+        // { label: 'Services', icon: <ServiceIcon />, path: '/admin/services' },
     ]
 
     useEffect(() => {
@@ -135,7 +138,7 @@ export default function Sidebar({ variant = 'permanent', open = true, onClose })
                 {/* Logo */}
                 <Box p={2} display="flex" justifyContent="center" alignItems="center">
                     <Link href="/admin">
-                        <Image src="/HLogo.png" alt="Logo" width={250} height={88} style={{ objectFit: 'contain' }} />
+                        <Image src="/LogoCompany.png" alt="Logo" width={250} height={88} style={{ objectFit: 'contain' }} />
                     </Link>
                 </Box>
 
@@ -254,9 +257,9 @@ export default function Sidebar({ variant = 'permanent', open = true, onClose })
                     <Box display="flex" alignItems="center">
                         <Avatar src="/profile.jpg" alt="User" sx={{ width: 42, height: 42, mr: 1 }} />
                         <Box>
-                            <Typography variant="body2" sx={{ fontWeight: 600 }}>Admin</Typography>
+                            <Typography variant="body2" sx={{ fontWeight: 600 }}>Company</Typography>
                             <Typography variant="caption" color="text.secondary">
-                                admin@vaahan.com
+                                company@vaahan.com
                             </Typography>
                         </Box>
                     </Box>
@@ -272,14 +275,6 @@ export default function Sidebar({ variant = 'permanent', open = true, onClose })
                     anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                     transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                 >
-                    <MenuItem
-                        onClick={() => {
-                            handleMenuClose();
-                            router.push('/admin/myProfile');
-                        }}
-                    >
-                        <PersonIcon sx={{ mr: 1 }} fontSize="small" /> My Profile
-                    </MenuItem>
                     <MenuItem>
                         <LogoutButton />
                     </MenuItem>

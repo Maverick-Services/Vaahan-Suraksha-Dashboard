@@ -63,7 +63,6 @@ export default function AdminLayout({ children }) {
         }, 0);
     }, [user, router, clearAuth])
 
-
     return (
         <LayoutDashboard>
             {children}
