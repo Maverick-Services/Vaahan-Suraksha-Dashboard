@@ -44,17 +44,6 @@ export default function page() {
         }
     }
 
-    async function copyToClipboard(text) {
-        try {
-            await navigator.clipboard.writeText(text);
-            // small visual feedback:
-            // you can replace with toast/snackbar if you have one
-            console.log("copied", text);
-        } catch (err) {
-            console.warn("copy failed", err);
-        }
-    }
-
     return (
         <InnerDashboardLayout>
             <PageHeading>Company Dashboard</PageHeading>
@@ -63,12 +52,6 @@ export default function page() {
                 {/* Left: Company Main Card (spans 2 cols on large screens) */}
                 <div className="lg:col-span-2 border border-gray-200 rounded-lg bg-white p-6">
                     <div className="flex items-start gap-2">
-                        {/* <div
-                            className="w-20 h-20 flex items-center justify-center rounded-md text-white text-lg font-bold"
-                            style={{ background: "linear-gradient(135deg,#7b39ff,#0cf)" }}
-                        >
-                            {user.name ? user.name.split(" ").map(s => s[0]).slice(0, 2).join("") : "C"}
-                        </div> */}
 
                         <div className="flex-1">
                             <div className="flex flex-col sm:flex-row items-start justify-between gap-4">
@@ -78,13 +61,6 @@ export default function page() {
                                         <BusinessIcon fontSize="small" /> Company
                                         <span className="mx-2">•</span>
                                         <span className="font-medium text-gray-700">{user.user_id}</span>
-                                        <button
-                                            type="button"
-                                            onClick={() => copyToClipboard(user.user_id)}
-                                            className="ml-2 inline-flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700"
-                                        >
-                                            <ContentCopyIcon sx={{ fontSize: 16 }} />
-                                        </button>
                                     </p>
                                 </div>
 
