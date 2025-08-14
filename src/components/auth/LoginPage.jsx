@@ -182,8 +182,6 @@ export default function LoginPage() {
                     Currently signing in as: <span className='font-bold capitalize'>{roleValue}</span>
                 </Typography>
             </div>
-            {/* just for testing */}
-            <LogoutButton />
         </div>
     )
 }

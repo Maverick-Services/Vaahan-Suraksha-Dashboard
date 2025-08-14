@@ -34,6 +34,7 @@ import {
 import { useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
+import LogoutButton from '../auth/LogoutButton'
 
 const drawerWidth = 260
 
@@ -144,7 +145,7 @@ export default function Sidebar({ variant = 'permanent', open = true, onClose })
                                         </>
                                     ) : (
                                         <Link href={path} passHref>
-                                            <ListItem button component="div">
+                                            <ListItem button>
                                                 {icon && <ListItemIcon>{icon}</ListItemIcon>}
                                                 <ListItemText primary={label} />
                                             </ListItem>
@@ -191,8 +192,8 @@ export default function Sidebar({ variant = 'permanent', open = true, onClose })
                     <MenuItem onClick={handleMenuClose}>
                         <Person sx={{ mr: 1 }} fontSize="small" /> My Profile
                     </MenuItem>
-                    <MenuItem onClick={handleMenuClose}>
-                        <Logout sx={{ mr: 1 }} fontSize="small" /> Logout
+                    <MenuItem>
+                        <LogoutButton />
                     </MenuItem>
                 </Menu>
             </Box>
