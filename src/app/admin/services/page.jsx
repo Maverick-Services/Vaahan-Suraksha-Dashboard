@@ -20,7 +20,7 @@ function page() {
         return (
             <InnerDashboardLayout>
                 <div className="mb-5 flex items-center justify-between">
-                    <PageHeading>Customers</PageHeading>
+                    <PageHeading>Services</PageHeading>
                     <Button variant="outlined">Add New</Button>
                 </div>
                 <TableSkeleton rows={5} />
