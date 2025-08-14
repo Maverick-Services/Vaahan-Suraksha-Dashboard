@@ -68,8 +68,8 @@ export default function ProductsTable({ apiData, onPageChange }) {
                                 <TableCell><Chip label={product?.brand?.name} /></TableCell>
                                 <TableCell>
                                     <div>
-                                        <h2 className="font-bold">{product?.sellingPrice}</h2>
-                                        <p className="text-xs text-red-500 line-through">{product?.regularPrice}</p>
+                                        <h2 className="font-bold">₹{product?.sellingPrice}</h2>
+                                        <p className="text-xs text-red-500 line-through">₹{product?.regularPrice}</p>
                                     </div>
 
                                 </TableCell>
