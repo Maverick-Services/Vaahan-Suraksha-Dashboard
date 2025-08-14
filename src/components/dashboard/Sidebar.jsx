@@ -91,9 +91,21 @@ export default function Sidebar({ variant = 'permanent', open = true, onClose })
     const handleMenuClose = () => setAnchorEl(null)
 
     const isActivePath = (path) => {
-        if (!path) return false
-        return pathname === path || pathname.startsWith(path + '/')
-    }
+        if (!path) return false;
+
+        // Exact match for /admin
+        if (path === '/admin') {
+            return pathname === '/admin';
+        }
+
+        // Normal check for other paths
+        return pathname === path || pathname.startsWith(path + '/');
+
+    };
+
+    // Child active check
+    const isExactActivePath = (path) => pathname === path;
+
 
     return (
         <Drawer
@@ -187,7 +199,7 @@ export default function Sidebar({ variant = 'permanent', open = true, onClose })
                                                                 my: 0.2,
                                                                 gap: 1,
                                                                 '&.Mui-selected': {
-                                                                    backgroundColor: 'rgba(0,0,0,0.06)',
+                                                                    backgroundColor: 'rgba(0,0,0,0.1)',
                                                                     color: 'inherit',
                                                                 },
                                                                 '&:hover': { backgroundColor: 'rgba(0,0,0,0.04)' },
