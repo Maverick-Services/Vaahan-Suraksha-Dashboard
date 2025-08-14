@@ -58,8 +58,8 @@ export default function CSidebar({ variant = 'permanent', open = true, onClose }
     const sections = [
         { label: 'Dashboard', icon: <DashboardIcon />, path: '/company' },
         { label: 'Members', icon: <GroupIcon />, path: '/company/members' },
-        { label: 'My Subscriptions', icon: <CarIcon />, path: '/company/mySubscriptions' },
-        { label: 'Profile', icon: <AccountCircleIcon />, path: '/company/profile' }
+        { label: 'My Subscriptions', icon: <SubscriptionsIcon />, path: '/company/mySubscriptions' },
+        // { label: 'Profile', icon: <AccountCircleIcon />, path: '/company/profile' }
         // {
         //     label: 'Users',
         //     icon: <UsersIcon />,
@@ -97,9 +97,9 @@ export default function CSidebar({ variant = 'permanent', open = true, onClose }
     const isActivePath = (path) => {
         if (!path) return false;
 
-        // Exact match for /admin
-        if (path === '/admin') {
-            return pathname === '/admin';
+        // Exact match for /company
+        if (path === '/company') {
+            return pathname === '/company';
         }
 
         // Normal check for other paths
