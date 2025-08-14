@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import {
     Drawer,
     Box,
@@ -45,6 +45,7 @@ import LogoutButton from '../auth/LogoutButton'
 const drawerWidth = 260
 
 export default function Sidebar({ variant = 'permanent', open = true, onClose }) {
+    const router = useRouter();
     const pathname = usePathname() || '/'
     const [openMenus, setOpenMenus] = useState({})
     const [anchorEl, setAnchorEl] = useState(null)
@@ -102,10 +103,6 @@ export default function Sidebar({ variant = 'permanent', open = true, onClose })
         return pathname === path || pathname.startsWith(path + '/');
 
     };
-
-    // Child active check
-    const isExactActivePath = (path) => pathname === path;
-
 
     return (
         <Drawer
@@ -275,10 +272,15 @@ export default function Sidebar({ variant = 'permanent', open = true, onClose })
                     anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                     transformOrigin={{ vertical: 'top', horizontal: 'right' }}
                 >
-                    <MenuItem onClick={handleMenuClose}>
+                    <MenuItem
+                        onClick={() => {
+                            handleMenuClose();
+                            router.push('/myProfile');
+                        }}
+                    >
                         <PersonIcon sx={{ mr: 1 }} fontSize="small" /> My Profile
                     </MenuItem>
-                    <MenuItem onClick={handleMenuClose}>
+                    <MenuItem>
                         <LogoutButton />
                     </MenuItem>
                 </Menu>
