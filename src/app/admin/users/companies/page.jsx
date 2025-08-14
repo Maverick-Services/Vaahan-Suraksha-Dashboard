@@ -5,16 +5,15 @@ import { useUsers } from "@/hooks/useUsers";
 import { Button } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import InnerDashboardLayout from "@/components/dashboard/InnerDashboardLayout";
-import CustomersTable from "../customers/components/CustomersTable";
 import TableSkeleton from "@/components/shared/TableSkeleton";
+import CompanyTable from "./components/CompanyTable";
 
 function Page() {
     const { usersQuery } = useUsers();
     const [page, setPage] = useState(1);
-    const [limit, setLimit] = useState(5)
 
     const usersData = usersQuery({
-        role: "user",
+        role: "company",
         page,
         limit: 5,
     });
@@ -23,7 +22,7 @@ function Page() {
         return (
             <InnerDashboardLayout>
                 <div className="mb-5 flex items-center justify-between">
-                    <PageHeading>Customers</PageHeading>
+                    <PageHeading>Companies</PageHeading>
                     <Button variant="outlined">Add New</Button>
                 </div>
                 <TableSkeleton rows={5} />
@@ -32,7 +31,7 @@ function Page() {
     }
 
     if (usersData.isError) {
-        return <div>Error: {usersData.error?.message || "Failed to load Users"}</div>;
+        return <div>Error: {usersData.error?.message || "Failed to load employees"}</div>;
     }
 
     const apiData = usersData?.data?.data?.data || {};
@@ -40,16 +39,17 @@ function Page() {
     return (
         <InnerDashboardLayout>
             <div className="mb-5 flex items-center justify-between">
-                <PageHeading>Customers</PageHeading>
+                <PageHeading>Companies</PageHeading>
                 <div>
                     <Button
                         variant="outlined"
+
                     >
                         Add New
                     </Button>
                 </div>
             </div>
-            <CustomersTable
+            <CompanyTable
                 apiData={apiData}
                 onPageChange={(newPage) => setPage(newPage)}
             />

@@ -1,21 +1,26 @@
-// @/lib/services/axios
-import axios from 'axios'
+// lib/api.js
+import { useAuthStore } from '@/stores/useAuthStore';
+import axios from 'axios';
 
-// Create instance
 const api = axios.create({
     baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
-    headers: { 'Content-Type': 'application/json' },
-})
+    headers: {
+        'Content-Type': 'application/json',
+    },
+});
 
-// Attach tokens automatically
-api.interceptors.request.use((cfg) => {
-    const token = typeof window !== 'undefined'
-        ? localStorage.getItem('accessToken')
-        : null
-    if (token) cfg.headers.Authorization = `Bearer ${token}`
-    return cfg;
-})
-export default api;
+// Request interceptor - Add token from Zustand
+api.interceptors.request.use(
+    (config) => {
+        const token = useAuthStore.getState().accessToken; // <- Get token from store
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
 
 // If a 401 comes back, try refreshing once
 // let isRefreshing = false
@@ -61,3 +66,4 @@ export default api;
 //     }
 // )
 
+export default api;

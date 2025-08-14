@@ -1,7 +1,8 @@
 import api from "@/lib/services/axios";
 import { useQuery } from "@tanstack/react-query";
+import toast from "react-hot-toast";
 
-export const useUser = () => {
+export const useUsers = () => {
 
     // Get all users in pagination
     const usersQuery = (params) => {
@@ -11,7 +12,7 @@ export const useUser = () => {
 
         return useQuery({
             queryKey: ['users', filteredParams],
-            queryFn: () => api.get(`/user/paginated`, { params: filteredParams, }).then(res => res.data),
+            queryFn: () => api.get(`/user/paginated`, { params: filteredParams }),
             keepPreviousData: true,
             staleTime: 1000 * 60 * 5,
             onError: (err) => {
