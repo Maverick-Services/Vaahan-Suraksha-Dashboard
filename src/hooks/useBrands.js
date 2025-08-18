@@ -1,8 +1,9 @@
 import api from "@/lib/services/axios";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 export const useBrands = () => {
+    const queryClient = useQueryClient();
 
     // Get all users in pagination
     const brandsQuery = (params) => {
@@ -24,7 +25,18 @@ export const useBrands = () => {
         });
     }
 
+    const createNewBrand = useMutation({
+        mutationFn: ({ data }) => api.post('/car/brand/create', data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['brands']);
+            toast.success('Brand created successfully');
+        },
+        onError: (err) => {
+            toast.error(err.message || 'Failed to create brand');
+        }
+    })
+
     return {
-        brandsQuery
+        brandsQuery, createNewBrand
     }
 }

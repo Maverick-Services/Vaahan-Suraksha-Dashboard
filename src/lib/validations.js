@@ -6,3 +6,9 @@ export const LoginPageSchema = z.object({
     password: z.string().min(6, 'Password must be at least 6 characters.'),
     role: z.enum(['employee', 'company'])
 });
+
+// Brand Schema
+export const brandSchema = z.object({
+    name: z.string().min(2, "Brand Name is required."),
+    active: z.boolean().default(true),
+});

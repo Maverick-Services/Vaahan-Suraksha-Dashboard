@@ -24,8 +24,6 @@ export default function BrandsTable({ apiData, onPageChange }) {
         setMenuRow(null);
     };
 
-    console.log(apiData)
-
     return (
         <Paper sx={{ width: "100%", overflow: "hidden" }}>
             <TableContainer>
