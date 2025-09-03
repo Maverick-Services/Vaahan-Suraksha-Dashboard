@@ -14,6 +14,8 @@ export default function BrandsTable({ apiData, onPageChange }) {
     const [anchorEl, setAnchorEl] = useState(null);
     const [menuRow, setMenuRow] = useState(null);
 
+    console.log(apiData)
+
     const handleMenuOpen = (event, row) => {
         setAnchorEl(event.currentTarget);
         setMenuRow(row);

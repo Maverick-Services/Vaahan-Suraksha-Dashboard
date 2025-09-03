@@ -41,7 +41,6 @@ function page() {
 
     const apiData = brandsData?.data?.data?.data || {};
 
-
     return (
         <InnerDashboardLayout>
             <div className="mb-5 flex items-center justify-between">
@@ -59,7 +58,7 @@ function page() {
                 apiData={apiData}
                 onPageChange={(newPage) => setPage(newPage)}
             />
-            {/* Dialog component placed once at page level */}
+
             <AddBrandDialog
                 open={dialogOpen}
                 onClose={() => setDialogOpen(false)}

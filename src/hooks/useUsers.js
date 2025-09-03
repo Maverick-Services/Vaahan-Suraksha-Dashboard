@@ -1,8 +1,9 @@
 import api from "@/lib/services/axios";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 export const useUsers = () => {
+    const queryClient = useQueryClient();
 
     // Get all users in pagination
     const usersQuery = (params) => {
@@ -24,7 +25,56 @@ export const useUsers = () => {
         });
     }
 
+    // Create Employee
+    const createNewEmployee = useMutation({
+        mutationFn: ({ data }) => api.post('/user/createEmploye', data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['users']);
+            toast.success('Employee created successfully');
+        },
+        onError: (err) => {
+            toast.error(err?.response?.data?.message || 'Failed to create employee');
+        }
+    })
+
+    // Create Company
+    const createNewCompany = useMutation({
+        mutationFn: ({ data }) => api.post('/user/createCompany', data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['users']);
+            toast.success('Company created successfully');
+        },
+        onError: (err) => {
+            toast.error(err?.response?.data?.message || 'Failed to create Company');
+        }
+    })
+
+    // Create Rider
+    const createNewRider = useMutation({
+        mutationFn: ({ data }) => api.post('/user/createRider', data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['users']);
+            toast.success('Rider created successfully');
+        },
+        onError: (err) => {
+            toast.error(err?.response?.data?.message || 'Failed to create Rider');
+        }
+    })
+
+    // Create User
+    const createNewUser = useMutation({
+        mutationFn: ({ data }) => api.post('/user/createUser', data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['users']);
+            toast.success('User created successfully');
+        },
+        onError: (err) => {
+            toast.error(err?.response?.data?.message || 'Failed to create User');
+        }
+    })
+
     return {
-        usersQuery
+        usersQuery,
+        createNewEmployee, createNewCompany, createNewUser, createNewRider
     }
 }

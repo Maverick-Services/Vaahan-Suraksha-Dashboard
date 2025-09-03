@@ -10,7 +10,7 @@ import Switch from "@mui/material/Switch";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Image from "next/image";
 
-export default function CarModelsTable({ apiData, onPageChange }) {
+export default function CarModelsTable({ apiData, onPageChange, limit, setLimit }) {
     const [anchorEl, setAnchorEl] = useState(null);
     const [menuRow, setMenuRow] = useState(null);
 
@@ -85,12 +85,17 @@ export default function CarModelsTable({ apiData, onPageChange }) {
             {/* Pagination */}
             <TablePagination
                 component="div"
-                count={apiData?.totalCount}
+                count={apiData?.totalCount || 0}
                 page={apiData?.pagination.page - 1}
                 onPageChange={(e, newPage) => onPageChange(newPage + 1)}
-                rowsPerPage={apiData?.pagination.limit}
-                rowsPerPageOptions={[5, 10, 25]}
+                rowsPerPage={limit}
+                onRowsPerPageChange={(e) => {
+                    setLimit(parseInt(e.target.value, 10));
+                    onPageChange(1);
+                }}
+                rowsPerPageOptions={[5, 10, 25, 50]}
             />
+
 
             {/* Menu */}
             <Menu

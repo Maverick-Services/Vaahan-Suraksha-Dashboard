@@ -17,7 +17,7 @@ export const useBrands = () => {
             keepPreviousData: true,
             staleTime: 1000 * 60 * 5,
             onError: (err) => {
-                toast.error(err.message || 'Failed to fetch Brands');
+                toast.error(err?.response?.data?.message || 'Failed to fetch Brands');
             },
             onSettled: () => {
                 queryClient.invalidateQueries(['brands']);
@@ -25,6 +25,7 @@ export const useBrands = () => {
         });
     }
 
+    // Create New Brand
     const createNewBrand = useMutation({
         mutationFn: ({ data }) => api.post('/car/brand/create', data),
         onSuccess: () => {
@@ -32,7 +33,7 @@ export const useBrands = () => {
             toast.success('Brand created successfully');
         },
         onError: (err) => {
-            toast.error(err.message || 'Failed to create brand');
+            toast.error(err?.response?.data?.message || 'Failed to create brand');
         }
     })
 

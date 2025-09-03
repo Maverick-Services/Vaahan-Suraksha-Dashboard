@@ -7,10 +7,12 @@ import AddIcon from '@mui/icons-material/Add';
 import InnerDashboardLayout from "@/components/dashboard/InnerDashboardLayout";
 import TableSkeleton from "@/components/shared/TableSkeleton";
 import CompanyTable from "./components/CompanyTable";
+import AddCompanyDialog from "./components/CompanyDialog";
 
 function Page() {
     const { usersQuery } = useUsers();
     const [page, setPage] = useState(1);
+    const [dialogOpen, setDialogOpen] = useState(false);
 
     const usersData = usersQuery({
         role: "company",
@@ -43,15 +45,23 @@ function Page() {
                 <div>
                     <Button
                         variant="outlined"
-
+                        onClick={() => setDialogOpen(true)}
                     >
                         Add New
                     </Button>
                 </div>
             </div>
+
+            {/* company table */}
             <CompanyTable
                 apiData={apiData}
                 onPageChange={(newPage) => setPage(newPage)}
+            />
+
+            {/* Dialog to add/edit company */}
+            <AddCompanyDialog
+                open={dialogOpen}
+                onClose={() => setDialogOpen(false)}
             />
         </InnerDashboardLayout>
     );

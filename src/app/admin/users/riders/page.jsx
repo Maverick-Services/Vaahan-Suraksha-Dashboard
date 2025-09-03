@@ -3,14 +3,15 @@ import React, { useState } from "react";
 import PageHeading from "@/components/shared/PageHeading";
 import { useUsers } from "@/hooks/useUsers";
 import { Button } from "@mui/material";
-import AddIcon from '@mui/icons-material/Add';
 import InnerDashboardLayout from "@/components/dashboard/InnerDashboardLayout";
 import TableSkeleton from "@/components/shared/TableSkeleton";
 import RidersTable from "./components/RidersTable";
+import AddRiderDialog from "./components/RiderDialog";
 
 function Page() {
     const { usersQuery } = useUsers();
     const [page, setPage] = useState(1);
+    const [dialogOpen, setDialogOpen] = useState(false);
 
     const usersData = usersQuery({
         role: "rider",
@@ -43,15 +44,23 @@ function Page() {
                 <div>
                     <Button
                         variant="outlined"
-
+                        onClick={() => setDialogOpen(true)}
                     >
                         Add New
                     </Button>
                 </div>
             </div>
+
+            {/* riders table */}
             <RidersTable
                 apiData={apiData}
                 onPageChange={(newPage) => setPage(newPage)}
+            />
+
+            {/* Dialog to add/edit rider */}
+            <AddRiderDialog
+                open={dialogOpen}
+                onClose={() => setDialogOpen(false)}
             />
         </InnerDashboardLayout>
     );

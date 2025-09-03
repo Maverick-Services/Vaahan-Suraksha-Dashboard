@@ -6,14 +6,17 @@ import { Button } from "@mui/material";
 import TableSkeleton from "@/components/shared/TableSkeleton";
 import { useCarModels } from "@/hooks/useCarModels";
 import CarModelsTable from "./components/CarModelsTable";
+import AddCarModelDialog from "./components/CarModelDialog";
 
 function page() {
     const { carModelsQuery } = useCarModels();
     const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(25);
+    const [dialogOpen, setDialogOpen] = useState(false);
 
     const carModelsData = carModelsQuery({
         page,
-        limit: 5,
+        limit,
     });
 
     if (carModelsData.isLoading) {
@@ -41,14 +44,25 @@ function page() {
                 <div>
                     <Button
                         variant="outlined"
+                        onClick={() => setDialogOpen(true)}
                     >
                         Add New
                     </Button>
                 </div>
             </div>
+
+            {/* car models table */}
             <CarModelsTable
                 apiData={apiData}
                 onPageChange={(newPage) => setPage(newPage)}
+                limit={limit}
+                setLimit={setLimit}
+            />
+
+            {/* Dialog to add/edit Car model */}
+            <AddCarModelDialog
+                open={dialogOpen}
+                onClose={() => setDialogOpen(false)}
             />
         </InnerDashboardLayout>
     )
