@@ -54,10 +54,10 @@ export default function AddCarModelDialog({ open, onClose, initialData = null })
     } = useForm({
         resolver: zodResolver(carModelSchema),
         defaultValues: {
-            name: "",
-            brandId: "",
-            image: "",
-            active: true,
+            // name: "",
+            // brandId: "",
+            // image: "",
+            // active: true,
         },
     });
 
@@ -125,7 +125,7 @@ export default function AddCarModelDialog({ open, onClose, initialData = null })
                 id="add-car-dialog"
                 className="flex items-center justify-between"
             >
-                Create New Car Model
+                Create Product
                 <IconButton size="small" onClick={onClose} aria-label="close">
                     <CloseIcon fontSize="small" />
                 </IconButton>
@@ -145,102 +145,16 @@ export default function AddCarModelDialog({ open, onClose, initialData = null })
                             <FormHelperText>{errors.name.message}</FormHelperText>
                         )}
                     </FormControl>
-
-                    {/* Brand Select */}
-                    <FormControl
-                        fullWidth
-                        margin="normal"
-                        error={Boolean(errors.brandId)} // error handling
-                    >
-                        <InputLabel id="brand-select-label">Brand</InputLabel>
-                        <Controller
-                            name="brandId"
-                            control={control}
-                            render={({ field }) => (
-                                <Select
-                                    labelId="brand-select-label"
-                                    label='Brand'
-                                    {...field}
-                                >
-                                    {Array.isArray(brands) &&
-                                        brands.map((brand) => (
-                                            <MenuItem key={brand._id} value={brand._id}>
-                                                {brand.name}
-                                            </MenuItem>
-                                        ))}
-                                </Select>
-                            )}
-                        />
-                        {errors.brandId && (
-                            <FormHelperText>{errors.brandId.message}</FormHelperText>
-                        )}
-                    </FormControl>
-
-                    {/* Image Upload */}
-                    <FormControl fullWidth margin="normal" error={Boolean(errors.image)}>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            ref={fileInputRef}
-                            onChange={handleImageChange}
-                            className="hidden"
-                        />
-
-                        {!image ? (
-                            <div
-                                className="flex-1 border-2 py-10 border-dashed border-gray-300 rounded-sm flex items-center justify-center cursor-pointer"
-                                onClick={handleImageClick}
-                            >
-                                <span className="text-gray-500">Click to select image</span>
-                            </div>
-                        ) : (
-                            <>
-                                <div className="h-full w-full border rounded-xl">
-                                    <Image
-                                        height={100}
-                                        width={100}
-                                        quality={100}
-                                        src={image}
-                                        alt="category image"
-                                        className="w-full h-44 object-contain"
-                                    />
-                                </div>
-                                <Button
-                                    type="button"
-                                    onClick={handleImageClick}
-                                    className="mt-2">
-                                    Change Image
-                                </Button>
-                            </>
-                        )}
-                        {errors.image && (
-                            <FormHelperText>{errors.image.message}</FormHelperText>
-                        )}
-                    </FormControl>
-
-                    {/* Active Switch */}
-                    <FormControl margin="normal">
-                        <Controller
-                            name="active"
-                            control={control}
-                            render={({ field }) => (
-                                <FormControlLabel
-                                    control={<Switch {...field} checked={field.value} />}
-                                    label="Active"
-                                />
-                            )}
-                        />
-                    </FormControl>
-
                 </DialogContent>
 
                 <DialogActions>
                     <Button onClick={onClose}>Cancel</Button>
                     <Button
                         variant="contained"
-                        type="submit"
-                        loading={createNewCarModel?.isPending}
-                        disabled={isUploading}>
+                    // type="submit"
+                    // loading={createNewCarModel?.isPending}
+                    // disabled={isUploading}
+                    >
                         Save
                     </Button>
                 </DialogActions>

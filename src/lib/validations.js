@@ -10,6 +10,7 @@ export const LoginPageSchema = z.object({
 // Brand Schema
 export const brandSchema = z.object({
     name: z.string().min(2, "Brand Name is required."),
+    image: z.string().min(2, "Image is required."),
     active: z.boolean().default(true),
 });
 
@@ -73,6 +74,14 @@ export const userSchema = z.object({
 // Car Model Schema
 export const carModelSchema = z.object({
     name: z.string().min(2, "Model Name is required."),
+    brandId: z.string().min(2, "Brand is required."),
+    image: z.string().min(2, "Image is required."),
+    active: z.boolean().default(true),
+});
+
+// Product Model Schema
+export const productSchema = z.object({
+    name: z.string().min(2, "Product Name is required."),
     brandId: z.string().min(2, "Brand is required."),
     image: z.string().min(2, "Image is required."),
     active: z.boolean().default(true),

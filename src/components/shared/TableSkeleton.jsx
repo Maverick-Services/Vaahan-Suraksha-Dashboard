@@ -7,10 +7,10 @@ import {
 
 export default function TableSkeleton({ rows = 5, columns = 5 }) {
     return (
-        <Paper sx={{ width: "100%", overflow: "hidden" }}>
+        <div className="bg-white border border-gray-200">
             <TableContainer>
                 <Table stickyHeader>
-                    <TableHead>
+                    {/* <TableHead>
                         <TableRow>
                             {[...Array(columns)].map((_, idx) => (
                                 <TableCell key={idx}>
@@ -22,7 +22,7 @@ export default function TableSkeleton({ rows = 5, columns = 5 }) {
                                 </TableCell>
                             ))}
                         </TableRow>
-                    </TableHead>
+                    </TableHead> */}
 
                     <TableBody>
                         {[...Array(rows)].map((_, i) => (
@@ -39,7 +39,8 @@ export default function TableSkeleton({ rows = 5, columns = 5 }) {
                                         ) : (
                                             <Skeleton
                                                 variant="text"
-                                                width="80%"
+                                                width={64}
+                                                height={24}
                                                 sx={{ bgcolor: "grey.400" }}
                                             />
                                         )}
@@ -50,6 +51,6 @@ export default function TableSkeleton({ rows = 5, columns = 5 }) {
                     </TableBody>
                 </Table>
             </TableContainer>
-        </Paper>
+        </div>
     );
 }

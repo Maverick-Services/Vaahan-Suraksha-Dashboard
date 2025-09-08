@@ -10,23 +10,11 @@ import { useProducts } from "@/hooks/useProducts";
 function page() {
     const { productsQuery } = useProducts();
     const [page, setPage] = useState(1);
+    const [limit, setLimit] = useState(25);
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [editingItem, setEditingItem] = useState(null)
 
-    const productsData = productsQuery({
-        page,
-        limit: 5,
-    });
-
-    if (productsData.isLoading) {
-        return (
-            <InnerDashboardLayout>
-                <div className="mb-5 flex items-center justify-between">
-                    <PageHeading>Products</PageHeading>
-                    <Button variant="outlined">Add New</Button>
-                </div>
-                <TableSkeleton rows={5} />
-            </InnerDashboardLayout>
-        );
-    }
+    const productsData = productsQuery({ page, limit });
 
     if (productsData.isError) {
         return <div>Error: {productsData.error?.message || "Failed to load Products"}</div>;

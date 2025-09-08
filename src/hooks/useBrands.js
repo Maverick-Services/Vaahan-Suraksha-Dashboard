@@ -37,6 +37,20 @@ export const useBrands = () => {
         }
     })
 
+    // Update Brand
+    // const updateBrand = useMutation({
+    //     mutationFn: ({ data }) => api.post('/car/brand/create', data),
+    //     onSuccess: () => {
+    //         queryClient.invalidateQueries(['brands']);
+    //         toast.success('Brand created successfully');
+    //     },
+    //     onError: (err) => {
+    //         toast.error(err?.response?.data?.message || 'Failed to create brand');
+    //     }
+    // })
+
+
+
     return {
         brandsQuery, createNewBrand
     }
