@@ -102,10 +102,10 @@ export default function ProductsTable({ apiData, onPageChange }) {
             {/* Pagination */}
             <TablePagination
                 component="div"
-                count={apiData?.totalCount}
-                page={apiData?.pagination.page - 1}
+                count={apiData?.totalCount || 0}
+                page={apiData?.pagination?.page - 1 || 0}
                 onPageChange={(e, newPage) => onPageChange(newPage + 1)}
-                rowsPerPage={apiData?.pagination.limit}
+                rowsPerPage={apiData?.pagination?.limit || 0}
                 rowsPerPageOptions={[5, 10, 25]}
             />
 

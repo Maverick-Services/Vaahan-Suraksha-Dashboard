@@ -3,16 +3,16 @@ import React, { useState } from "react";
 import InnerDashboardLayout from '@/components/dashboard/InnerDashboardLayout'
 import PageHeading from '@/components/shared/PageHeading'
 import { Button } from "@mui/material";
-import TableSkeleton from "@/components/shared/TableSkeleton";
+// import TableSkeleton from "@/components/shared/TableSkeleton";
 import ProductsTable from "./components/ProductsTable";
 import { useProducts } from "@/hooks/useProducts";
 
-function page() {
+export default function ProductsPage() {
     const { productsQuery } = useProducts();
     const [page, setPage] = useState(1);
     const [limit, setLimit] = useState(25);
-    const [dialogOpen, setDialogOpen] = useState(false);
-    const [editingItem, setEditingItem] = useState(null)
+    // const [dialogOpen, setDialogOpen] = useState(false);
+    // const [editingItem, setEditingItem] = useState(null)
 
     const productsData = productsQuery({ page, limit });
 
@@ -41,5 +41,3 @@ function page() {
         </InnerDashboardLayout>
     )
 }
-
-export default page
