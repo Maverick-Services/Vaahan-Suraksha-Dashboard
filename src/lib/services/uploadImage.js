@@ -1,3 +1,4 @@
+// lib/uploadImage.js
 import axios from "axios"
 
 export async function uploadImage(dataUrl) {

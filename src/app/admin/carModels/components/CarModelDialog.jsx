@@ -1,22 +1,13 @@
+// app/admin/carModels/components/CarModelDialog.jsx
+
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
 import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Button,
-    TextField,
-    IconButton,
-    FormControl,
-    FormHelperText,
-    Box,
-    FormControlLabel,
-    Switch,
-    Select,
-    MenuItem,
-    InputLabel,
+    Dialog, DialogTitle, DialogContent,
+    DialogActions, Button, TextField,
+    IconButton, FormControl, FormHelperText, Box,
+    FormControlLabel, Switch, Select, MenuItem, InputLabel,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useForm, Controller } from "react-hook-form";

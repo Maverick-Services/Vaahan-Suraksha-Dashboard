@@ -1,3 +1,4 @@
+// app/admin/carModels/components/CarModelsTable.jsx
 "use client";
 import React, { useState } from "react";
 import {
@@ -56,14 +57,13 @@ export default function CarModelsTable({ apiData, onPageChange, limit, setLimit,
                                             />
                                         </div>
                                     </TableCell>
-                                    <TableCell>{carModel.name}</TableCell>
+                                    <TableCell>{carModel?.name}</TableCell>
                                     <TableCell><Chip label={carModel?.brand?.name} /></TableCell>
                                     <TableCell>
                                         <Switch
-                                            checked={carModel.active}
+                                            checked={carModel?.active}
                                             onChange={(e) => {
                                                 console.log("Toggled", carModel._id, e.target.checked);
-                                                // you can call an API here to update status
                                             }}
                                             color="primary"
                                         />

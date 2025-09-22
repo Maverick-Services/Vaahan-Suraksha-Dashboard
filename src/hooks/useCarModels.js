@@ -28,7 +28,7 @@ export const useCarModels = () => {
     const createNewCarModel = useMutation({
         mutationFn: ({ data }) => api.post('/car/model/create', data),
         onSuccess: () => {
-            queryClient.invalidateQueries(['users']);
+            queryClient.invalidateQueries(['carModels']);
             toast.success('Car Model created successfully');
         },
         onError: (err) => {

@@ -1,4 +1,4 @@
-// lib/api.js
+// lib/axios.js
 import { useAuthStore } from '@/stores/useAuthStore';
 import axios from 'axios';
 

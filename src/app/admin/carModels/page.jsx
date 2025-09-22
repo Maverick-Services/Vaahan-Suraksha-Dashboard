@@ -1,3 +1,5 @@
+// app/admin/carModels/page.jsx
+
 "use client";
 import React, { useState } from "react";
 import InnerDashboardLayout from '@/components/dashboard/InnerDashboardLayout'
@@ -25,7 +27,10 @@ function page() {
     return (
         <InnerDashboardLayout>
             <div className="mb-5 flex items-center justify-between">
-                <PageHeading>Car Models</PageHeading>
+                <div>
+                    <PageHeading>Car Models</PageHeading>
+                    <p className="text-gray-500">Showing the data of all models of cars.</p>
+                </div>
                 <div>
                     <Button
                         variant="outlined"
@@ -44,7 +49,6 @@ function page() {
                 setLimit={setLimit}
                 dataLoading={carModelsData.isLoading}
                 onEdit={(brand) => { setEditingItem(brand); setDialogOpen(true); }}
-
             />
 
             {/* Dialog to add/edit Car model */}

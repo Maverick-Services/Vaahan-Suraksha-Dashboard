@@ -1,3 +1,4 @@
+// app/admin/services/components/ServicesTable.jsx
 "use client";
 import React, { useState } from "react";
 import {
@@ -7,10 +8,10 @@ import {
 } from "@mui/material";
 import Switch from "@mui/material/Switch";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
-import { formatDate_DD_MMM_YYYY } from "@/lib/services/dateFormat";
 import Image from "next/image";
+import TableSkeleton2 from "@/components/shared/TableSkeleton2";
 
-export default function ServicesTable({ apiData, onPageChange }) {
+export default function ServicesTable({ apiData, onPageChange, limit, setLimit, dataLoading, onEdit }) {
     const [anchorEl, setAnchorEl] = useState(null);
     const [menuRow, setMenuRow] = useState(null);
 
@@ -24,10 +25,8 @@ export default function ServicesTable({ apiData, onPageChange }) {
         setMenuRow(null);
     };
 
-    console.log(apiData)
-
     return (
-        <Paper sx={{ width: "100%", overflow: "hidden" }}>
+        <div>
             <TableContainer>
                 <Table stickyHeader>
                     <TableHead>
@@ -40,56 +39,62 @@ export default function ServicesTable({ apiData, onPageChange }) {
                             <TableCell align="right">Actions</TableCell>
                         </TableRow>
                     </TableHead>
-
-                    <TableBody>
-                        {apiData?.services?.map((service, index) => (
-                            <TableRow hover key={service._id}>
-                                <TableCell>{(apiData?.pagination.page - 1) * apiData?.pagination.limit + index + 1}</TableCell>
-                                <TableCell>
-                                    <div>
-                                        <Image
-                                            src={service?.images[0] || '/226.jpg'}
-                                            alt="Service"
-                                            height={100}
-                                            width={100}
+                    {dataLoading
+                        ? <TableSkeleton2 rows={6} columns={6} />
+                        : <TableBody>
+                            {apiData?.services?.map((service, index) => (
+                                <TableRow hover key={service._id}>
+                                    <TableCell>{(apiData?.pagination.page - 1) * apiData?.pagination.limit + index + 1}</TableCell>
+                                    <TableCell>
+                                        <div>
+                                            <Image
+                                                src={service?.images[0] || '/226.jpg'}
+                                                alt="Service"
+                                                height={100}
+                                                width={100}
+                                            />
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>{service.service_id}</TableCell>
+                                    <TableCell>{service.name}</TableCell>
+                                    <TableCell>
+                                        <Switch
+                                            checked={service.active}
+                                            onChange={(e) => {
+                                                console.log("Toggled", service._id, e.target.checked);
+                                                // you can call an API here to update status
+                                            }}
+                                            color="primary"
                                         />
-                                    </div>
-                                </TableCell>
-                                <TableCell>{service.service_id}</TableCell>
-                                <TableCell>{service.name}</TableCell>
-                                <TableCell>
-                                    <Switch
-                                        checked={service.active}
-                                        onChange={(e) => {
-                                            console.log("Toggled", service._id, e.target.checked);
-                                            // you can call an API here to update status
-                                        }}
-                                        color="primary"
-                                    />
-                                </TableCell>
+                                    </TableCell>
 
-                                <TableCell align="right">
-                                    <IconButton
-                                        size="small"
-                                        onClick={(e) => handleMenuOpen(e, service)}
-                                    >
-                                        <MoreVertIcon />
-                                    </IconButton>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
+                                    <TableCell align="right">
+                                        <IconButton
+                                            size="small"
+                                            onClick={(e) => handleMenuOpen(e, service)}
+                                        >
+                                            <MoreVertIcon />
+                                        </IconButton>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    }
                 </Table>
             </TableContainer>
 
             {/* Pagination */}
             <TablePagination
                 component="div"
-                count={apiData?.totalCount}
-                page={apiData?.pagination.page - 1}
+                count={apiData?.totalCount || 0}
+                page={apiData?.pagination?.page - 1 || 0}
                 onPageChange={(e, newPage) => onPageChange(newPage + 1)}
-                rowsPerPage={apiData?.pagination.limit}
-                rowsPerPageOptions={[5, 10, 25]}
+                rowsPerPage={limit || 0}
+                onRowsPerPageChange={(e) => {
+                    setLimit(parseInt(e.target.value, 10));
+                    onPageChange(1);
+                }}
+                rowsPerPageOptions={[5, 10, 25, 50]}
             />
 
             {/* Menu */}
@@ -99,9 +104,9 @@ export default function ServicesTable({ apiData, onPageChange }) {
                 onClose={handleMenuClose}
             >
                 <MenuItem onClick={() => { console.log("View", menuRow); handleMenuClose(); }}>View</MenuItem>
-                <MenuItem onClick={() => { console.log("Edit", menuRow); handleMenuClose(); }}>Edit</MenuItem>
+                <MenuItem onClick={() => { console.log("Edit", onEdit && onEdit(menuRow)); handleMenuClose(); }}>Edit</MenuItem>
                 <MenuItem onClick={() => { console.log("Delete", menuRow); handleMenuClose(); }}>Delete</MenuItem>
             </Menu>
-        </Paper>
+        </div>
     );
 }

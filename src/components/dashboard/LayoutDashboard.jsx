@@ -28,7 +28,7 @@ function LayoutDashboard({ children }) {
                 <Navbar onDrawerToggle={handleDrawerToggle} />
 
                 {/* Page content, pushed below the AppBar (default 64px height) */}
-                <main className="flex-1 max-[900px]:pt-[64px] p-2 max-[900px]:p-4 overflow-y-auto bg-gray-50">
+                <main className="flex-1 max-[900px]:pt-[64px] p-2 max-[900px]:p-4 overflow-y-auto bg-[#F9FAFB]">
                     {children}
                 </main>
             </div>

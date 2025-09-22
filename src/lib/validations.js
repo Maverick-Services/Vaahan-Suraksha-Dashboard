@@ -1,3 +1,4 @@
+// app/lib/validations.js
 import z from "zod";
 
 // Login 
@@ -86,3 +87,10 @@ export const productSchema = z.object({
     image: z.string().min(2, "Image is required."),
     active: z.boolean().default(true),
 });
+
+// Service Schema
+export const serviceSchema = z.object({
+    name: z.string().min(2, "Model Name is required."),
+    active: z.boolean().default(true),
+    images: z.array(z.string()).min(1, "Image is required."),
+})
