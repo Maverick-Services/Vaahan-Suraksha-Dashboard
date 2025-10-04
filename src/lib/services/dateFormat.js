@@ -1,4 +1,4 @@
-// utils/dateFormat.js
+// lib/services/dateFormat.js
 import { format, formatDistanceToNow, parseISO, isValid } from "date-fns";
 
 /**

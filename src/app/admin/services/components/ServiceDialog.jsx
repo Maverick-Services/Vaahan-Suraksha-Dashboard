@@ -1,19 +1,10 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Button,
-    TextField,
-    IconButton,
-    FormControl,
-    FormHelperText,
-    Box,
-    FormControlLabel,
-    Switch,
+    Dialog, DialogTitle, DialogContent, DialogActions,
+    Button, TextField, IconButton, FormControl,
+    FormHelperText, Box, FormControlLabel, Switch,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useForm, Controller } from "react-hook-form";
@@ -21,20 +12,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { serviceSchema } from "@/lib/validations";
 import Image from "next/image";
 import toast from "react-hot-toast";
-import { uploadImage } from "@/lib/services/uploadImage";
+import { uploadImage2 } from "@/lib/services/uploadImage";
 import { useServices } from "@/hooks/useServices";
 
 export default function ServiceDialog({ open, onClose, initialData = null }) {
     const fileInputRef = useRef(null);
+    const [uploading, setUploading] = useState(false)
     const { createNewService, updateService } = useServices();
 
-    const [images, setImages] = useState([]);
     const {
         register,
         handleSubmit,
         control,
         reset,
         setValue,
+        getValues,
+        watch,
         formState: { errors },
     } = useForm({
         resolver: zodResolver(serviceSchema),
@@ -45,47 +38,34 @@ export default function ServiceDialog({ open, onClose, initialData = null }) {
         },
     });
 
-    // Initialize/reset form when open or initialData changes
     useEffect(() => {
         if (initialData) {
-            // if editing, populate fields
             const initImages = Array.isArray(initialData.images) ? initialData.images : [];
             reset({
                 name: initialData.name || "",
                 images: initImages,
-                active: typeof initialData.active === "boolean" ? initialData.active : true,
+                active: typeof initialData?.active === "boolean" ? initialData?.active : true,
             });
-            setImages(initImages);
         } else {
             reset({ name: "", images: [], active: true });
-            setImages([]);
         }
     }, [initialData, open, reset]);
 
-    // Keep form value in sync with local images state
-    useEffect(() => {
-        setValue("images", images, { shouldValidate: true });
-    }, [images, setValue]);
+    const images = watch("images") || [];
 
     const onSubmit = async (data) => {
         try {
-            // If initialData exists, we are in Edit mode — per your request DO NOT call edit API now.
+            // create new
             if (initialData) {
                 await updateService.mutateAsync({
                     serviceId: initialData?._id,
                     ...data
                 });
-                // console.log("Edit submit (no API call):", {
-                //     serviceId: initialData?._id,
-                //     ...data
-                // });
-                // toast.success("Service data ready (edit not applied - as requested).");
 
                 onClose();
                 return;
             }
-
-            // Create mode: call create mutation
+            // Edit
             await createNewService.mutateAsync({ data });
             onClose();
             reset();
@@ -94,44 +74,41 @@ export default function ServiceDialog({ open, onClose, initialData = null }) {
         }
     };
 
+    // Upload Images
     const handleFilesSelected = async (e) => {
         const files = e.target.files;
         if (!files || files.length === 0) return;
 
         const toastId = toast.loading("Uploading images...");
-        const urls = [];
+        const uploadedUrls = [];
 
-        // sequential upload (safer) — you can parallelize if you want (Promise.all)
         for (let i = 0; i < files.length; i++) {
             const file = files[i];
             try {
-                const reader = new FileReader();
-                const result = await new Promise((resolve, reject) => {
-                    reader.onloadend = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                });
-
-                const url = await uploadImage(result);
-                urls.push(url);
+                setUploading(true)
+                const url = await uploadImage2(file);
+                if (url) uploadedUrls.push(url);
             } catch (err) {
-                console.error("Image upload failed", err);
-                // continue uploading remaining images
+                console.error("Image upload failed:", err);
+            } finally {
+                setUploading(false)
             }
         }
 
-        // append uploaded urls to images state
-        setImages((prev) => [...prev, ...urls]);
-
+        const existing = getValues("images") || [];
+        setValue("images", [...existing, ...uploadedUrls], { shouldValidate: true });
         toast.success("Images uploaded", { id: toastId });
+
         e.target.value = "";
     };
 
     const removeImageAt = (index) => {
-        setImages((prev) => prev.filter((_, i) => i !== index));
+        const current = getValues("images") || [];
+        const next = current.filter((_, i) => i !== index);
+        setValue("images", next, { shouldValidate: true });
     };
 
-    const handleOpenFilePicker = () => fileInputRef.current?.click();
+    const openFilePicker = () => fileInputRef.current?.click();
 
     return (
         <Dialog
@@ -172,28 +149,36 @@ export default function ServiceDialog({ open, onClose, initialData = null }) {
 
                         {/* previews */}
                         <div className="grid grid-cols-1 gap-3">
-                            {images?.map((url, idx) => (
-                                <div key={url + idx} className="relative group rounded overflow-hidden">
-                                    <div style={{ position: 'relative', width: '100%', height: 220 }}>
-                                        <Image
-                                            src={url}
-                                            alt={`img-${idx}`}
-                                            fill
-                                            sizes="(max-width: 600px) 100vw, 400px"
-                                            style={{ objectFit: 'cover' }}
-                                        />
-                                    </div>
+                            {Array.isArray(images) && images.length > 0 ? (
+                                images.map((url, idx) => (
+                                    <div key={`${url}-${idx}`} className="relative group rounded overflow-hidden">
+                                        <div style={{ position: 'relative', width: '100%', height: 220 }}>
+                                            <Image
+                                                src={url}
+                                                alt={`img-${idx}`}
+                                                fill
+                                                sizes="(max-width: 600px) 100vw, 400px"
+                                                style={{ objectFit: 'cover' }}
+                                            />
+                                        </div>
 
-                                    <button
-                                        type="button"
-                                        onClick={() => removeImageAt(idx)}
-                                        className="absolute top-2 right-2 bg-white cursor-pointer text-red-500 rounded-full py-1 px-2 shadow-md opacity-90"
-                                        title="Remove image"
-                                    >
-                                        ✕
-                                    </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => removeImageAt(idx)}
+                                            className="absolute top-2 right-2 bg-white cursor-pointer text-red-500 rounded-full py-1 px-2 shadow-md opacity-90"
+                                            title="Remove image"
+                                        >
+                                            ✕
+                                        </button>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="text-gray-500 bg-gray-100 border border-gray-300 rounded-sm h-30 p-6 flex items-center justify-center">
+                                    <p>
+                                        No images uploaded yet.
+                                    </p>
                                 </div>
-                            ))}
+                            )}
                         </div>
 
                         {/* hidden file input */}
@@ -209,24 +194,11 @@ export default function ServiceDialog({ open, onClose, initialData = null }) {
                         <div className="mt-3 flex gap-2">
                             <Button
                                 type="button"
-                                onClick={handleOpenFilePicker}
-                                className="mt-2"
+                                onClick={openFilePicker}
                                 variant="outlined"
                             >
                                 Upload Images
                             </Button>
-
-                            {/* <Button
-                                type="button"
-                                onClick={() => {
-                                    // quick clear all images
-                                    setImages([]);
-                                }}
-                                className="mt-2"
-                                color="secondary"
-                            >
-                                Clear Images
-                            </Button> */}
                         </div>
 
                         {errors.images && (
@@ -247,6 +219,7 @@ export default function ServiceDialog({ open, onClose, initialData = null }) {
                             )}
                         />
                     </FormControl>
+
                 </DialogContent>
 
                 <DialogActions>
@@ -254,7 +227,7 @@ export default function ServiceDialog({ open, onClose, initialData = null }) {
                     <Button
                         variant="contained"
                         type="submit"
-                        disabled={createNewService?.isPending}
+                        disabled={createNewService?.isPending || uploading}
                         loading={createNewService?.isPending}
                     >
                         {initialData ? "Save Changes" : "Save"}

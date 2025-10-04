@@ -24,3 +24,22 @@ export async function uploadImage(dataUrl) {
     throw error;
   }
 }
+
+export async function uploadImage2(file) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", "vaahan_suraksha");
+  formData.append("folder", "vaahan-suraksha");
+
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/dvractwu7/image/upload`,
+    {
+      method: "POST",
+      body: formData,
+    }
+  );
+
+  if (!res.ok) throw new Error("Upload failed");
+  const data = await res.json();
+  return data.secure_url;
+}

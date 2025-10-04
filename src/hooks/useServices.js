@@ -40,7 +40,7 @@ export const useServices = () => {
 
     // Update Service
     const updateService = useMutation({
-        mutationFn: ({ data }) => api.post('/service/update', data),
+        mutationFn: ({ data }) => api.put('/service/update', data),
         onSuccess: () => {
             queryClient.invalidateQueries(['services']);
             toast.success('Service created successfully');

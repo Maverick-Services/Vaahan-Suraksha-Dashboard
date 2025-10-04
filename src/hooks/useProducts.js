@@ -1,12 +1,13 @@
-
+// hooks/useProducts.js
 import api from "@/lib/services/axios";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 
 export const useProducts = () => {
+    const queryClient = useQueryClient();
 
-    // Get all users in pagination
-    const productsQuery = (params) => {
+    // Get all products in pagination
+    const productsQuery = (params = {}) => {
         const filteredParams = Object.fromEntries(
             Object.entries(params || {}).filter(([_, value]) => value !== undefined && value !== null && value !== '')
         );
@@ -17,7 +18,7 @@ export const useProducts = () => {
             keepPreviousData: true,
             staleTime: 1000 * 60 * 5,
             onError: (err) => {
-                toast.error(err.message || 'Failed to fetch Products');
+                toast.error(err?.response?.data?.message || err.message || 'Failed to fetch Products');
             },
             onSettled: () => {
                 queryClient.invalidateQueries(['products']);
@@ -25,7 +26,46 @@ export const useProducts = () => {
         });
     }
 
+    // Create New Product
+    const createNewProduct = useMutation({
+        mutationFn: ({ data }) => api.post('/inventory/product/create', data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['products']);
+            toast.success('Product created successfully');
+        },
+        onError: (err) => {
+            toast.error(err?.response?.data?.message || err.message || 'Failed to create Product');
+        }
+    });
+
+    // Update Product
+    const updateProduct = useMutation({
+        mutationFn: ({ data }) => api.put('/inventory/product/update', data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['products']);
+            toast.success('Product updated successfully');
+        },
+        onError: (err) => {
+            toast.error(err?.response?.data?.message || err.message || 'Failed to update Product');
+        }
+    });
+
+    // Update Stock
+    const updateStock = useMutation({
+        mutationFn: ({ productId, data }) => api.put('/inventory/product/stock/update', { productId, ...data }),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['products']);
+            toast.success('Stock updated successfully');
+        },
+        onError: (err) => {
+            toast.error(err?.response?.data?.message || err.message || 'Failed to update stock');
+        }
+    });
+
     return {
-        productsQuery
-    }
-}
+        productsQuery,
+        createNewProduct,
+        updateProduct,
+        updateStock,
+    };
+};
