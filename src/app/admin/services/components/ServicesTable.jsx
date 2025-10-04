@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import {
     Table, TableBody, TableCell, TableContainer,
-    TableHead, TableRow, Paper, IconButton, Menu, MenuItem,
+    TableHead, TableRow, IconButton, Menu, MenuItem,
     TablePagination
 } from "@mui/material";
 import Switch from "@mui/material/Switch";

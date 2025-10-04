@@ -80,17 +80,49 @@ export const carModelSchema = z.object({
     active: z.boolean().default(true),
 });
 
-// Product Model Schema
-export const productSchema = z.object({
-    name: z.string().min(2, "Product Name is required."),
-    brandId: z.string().min(2, "Brand is required."),
-    image: z.string().min(2, "Image is required."),
-    active: z.boolean().default(true),
-});
-
 // Service Schema
 export const serviceSchema = z.object({
     name: z.string().min(2, "Model Name is required."),
     active: z.boolean().default(true),
     images: z.array(z.string()).min(1, "Image is required."),
+
 })
+
+// Products Schema
+export const productSchema = z.object({
+    name: z.string().min(2, "Product name is required."),
+    description: z.string().optional().nullable(),
+    brandId: z.string().optional().nullable(),
+    carModelId: z.string().optional().nullable(),
+    sku: z.string().optional().nullable(),
+    hsn: z.string().optional().nullable(),
+    gst: z
+        .preprocess((v) => {
+            if (v === "" || v === null || v === undefined) return 0;
+            if (typeof v === "string" && !isNaN(Number(v))) return Number(v);
+            return v;
+        }, z.number().min(0, "GST cannot be negative.").optional().default(0)),
+    regularPrice: z
+        .preprocess((v) => (v === "" ? undefined : Number(v)), z.number().nonnegative().default(0))
+        .optional(),
+    sellingPrice: z
+        .preprocess((v) => (v === "" ? undefined : Number(v)), z.number().nonnegative().default(0))
+        .optional(),
+    images: z.array(z.string()).optional().default([]),
+    active: z.boolean().default(true),
+});
+
+// product stock schema
+export const stockSchema = z.object({
+  vendor: z.string().optional().nullable(),
+  purchasePrice: z.preprocess((v) => {
+    if (v === "" || v === null || v === undefined) return undefined;
+    return Number(v);
+  }, z.number().nonnegative("Purchase price cannot be negative").optional()),
+  quantity: z.preprocess((v) => {
+    // coerce numeric strings to number
+    if (typeof v === "string" && v.trim() === "") return undefined;
+    if (typeof v === "string" && !isNaN(Number(v))) return Number(v);
+    return v;
+  }, z.number().int("Quantity must be an integer").positive("Quantity must be greater than 0")),
+});
