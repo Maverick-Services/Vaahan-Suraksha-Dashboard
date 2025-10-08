@@ -1,5 +1,6 @@
 // app/lib/validations.js
 import z from "zod";
+import { CAR_TYPES } from "./constants";
 
 // Login 
 export const LoginPageSchema = z.object({
@@ -143,10 +144,17 @@ export const stockSchema = z.object({
 });
 
 
-// One-time Plan Schema
+// One-time Plan Schema - DYNAMIC VERSION
 export const oneTimePlanSchema = z.object({
-  name: z.string().min(2, "Plan name is required."),
-  services: z.array(z.any()).optional().default([]), 
-  pricing: z.record(z.any()).optional().default({}),
-  active: z.boolean().default(true),
+    name: z.string().min(2, "Plan name is required."),
+    services: z.array(z.string()).optional().default([]),
+    pricing: z.object(
+        CAR_TYPES.reduce((acc, carType) => {
+            acc[carType.key] = z.union([z.number(), z.string()])
+                .optional()
+                .transform(val => val === "" ? undefined : Number(val));
+            return acc;
+        }, {})
+    ).optional().default({}),
+    active: z.boolean().default(true),
 });
