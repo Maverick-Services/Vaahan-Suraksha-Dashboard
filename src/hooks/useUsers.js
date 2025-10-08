@@ -73,8 +73,21 @@ export const useUsers = () => {
         }
     })
 
+    // update any type of user
+    const updateUser = useMutation({
+        mutationFn: ({ data }) => api.put('/user/update', data),
+        onSuccess: () => {
+            queryClient.invalidateQueries(['users']);
+            toast.success('User updated successfully');
+        },
+        onError: (err) => {
+            toast.error(err?.response?.data?.message || 'Failed to update User');
+        }
+    })
+
     return {
         usersQuery,
-        createNewEmployee, createNewCompany, createNewUser, createNewRider
+        createNewEmployee, createNewCompany, createNewUser, createNewRider,
+        updateUser,
     }
 }

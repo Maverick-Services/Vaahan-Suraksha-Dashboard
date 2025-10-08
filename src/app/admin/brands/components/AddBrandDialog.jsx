@@ -2,18 +2,9 @@
 
 import React, { useRef, useState, useEffect } from "react";
 import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Button,
-    TextField,
-    IconButton,
-    FormControl,
-    FormHelperText,
-    Switch,
-    FormControlLabel,
-    Box,
+    Dialog, DialogTitle, DialogContent, DialogActions,
+    Button, TextField, IconButton, FormControl, FormHelperText,
+    Switch, FormControlLabel, Box
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useForm, Controller } from "react-hook-form";
@@ -23,9 +14,9 @@ import toast from "react-hot-toast";
 import { uploadImage } from "@/lib/services/uploadImage";
 import Image from "next/image";
 import { useBrands } from "@/hooks/useBrands";
+import { LoadingButton } from "@mui/lab";
 
 export default function AddBrandDialog({ open, onClose, initialData = null }) {
-    // Image uploading 
     const fileInputRef = useRef(null);
     const [isUploading, setIsUploading] = useState(false);
     const [image, setImage] = useState(initialData?.image || null);
@@ -56,11 +47,13 @@ export default function AddBrandDialog({ open, onClose, initialData = null }) {
                 active: typeof initialData.active === "boolean" ? initialData.active : true,
             });
             setImage(initialData.image || null);
+            setValue("image", initialData.image || "");
         } else {
             reset({ name: "", image: "", active: true });
             setImage(null);
+            setValue("image", "");
         }
-    }, [initialData, open, reset]);
+    }, [initialData, open, reset, setValue]);
 
     const handleImageChange = async (e) => {
         const file = e.target.files?.[0];
@@ -90,13 +83,19 @@ export default function AddBrandDialog({ open, onClose, initialData = null }) {
     const onSubmit = async (data) => {
         try {
             if (initialData && initialData._id) {
-                // Edit mode
-                // await updateBrand.mutateAsync({ id: initialData._id, data });
-                console.log('abc')
-            } else {
-                // Create mode
-                await createNewBrand.mutateAsync({ data });
+                // Edit mode — adapt to your useBrands.updateBrand signature.
+                // I assume updateBrand.mutateAsync({ id, data })
+                await updateBrand.mutateAsync({ id: initialData._id, data });
+                toast.success("Brand updated");
+                onClose();
+                reset();
+                return;
             }
+
+            // Create mode
+            await createNewBrand.mutateAsync({ data });
+            toast.success("Brand created");
+            onClose();
             reset();
         } catch (err) {
             console.error(err);
@@ -104,7 +103,7 @@ export default function AddBrandDialog({ open, onClose, initialData = null }) {
         }
     };
 
-    const isSubmitting = isUploading || createNewBrand?.isLoading || updateBrand?.isLoading;
+    const isSubmitting = isUploading || createNewBrand?.isPending || updateBrand?.isPending;
 
     return (
         <Dialog open={!!open} onClose={onClose} fullWidth maxWidth="sm" aria-labelledby="add-brand-dialog">
@@ -133,8 +132,8 @@ export default function AddBrandDialog({ open, onClose, initialData = null }) {
                             </div>
                         ) : (
                             <>
-                                <div className="h-full w-full border rounded-xl">
-                                    <Image height={100} width={100} quality={100} src={image} alt="category image" className="w-full h-44 object-contain" />
+                                <div className="h-full w-full border rounded-xl flex items-center justify-center py-4">
+                                    <Image height={100} width={100} quality={100} src={image} alt="brand image" className="object-contain" />
                                 </div>
                                 <Button type="button" onClick={handleImageClick} className="mt-2">Change Image</Button>
                             </>
@@ -153,9 +152,9 @@ export default function AddBrandDialog({ open, onClose, initialData = null }) {
 
                 <DialogActions>
                     <Button onClick={onClose}>Cancel</Button>
-                    <Button variant="contained" type="submit" disabled={isSubmitting}>
-                        {initialData ? (isSubmitting ? "Saving..." : "Save Changes") : (isSubmitting ? "Saving..." : "Save")}
-                    </Button>
+                    <LoadingButton variant="contained" type="submit" loading={isSubmitting}>
+                        {initialData ? "Save Changes" : "Save"}
+                    </LoadingButton>
                 </DialogActions>
             </Box>
         </Dialog>

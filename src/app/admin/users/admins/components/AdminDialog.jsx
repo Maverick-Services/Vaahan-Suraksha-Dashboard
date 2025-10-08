@@ -2,29 +2,21 @@
 
 import React, { useEffect, useState } from "react";
 import {
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    Button,
-    TextField,
-    IconButton,
-    FormControl,
-    FormHelperText,
-    Box,
-    InputAdornment,
+    Dialog, DialogTitle, DialogContent, DialogActions,
+    Button, TextField, IconButton, FormControl,
+    FormHelperText, Box, InputAdornment
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { employeeSchema } from "@/lib/validations";
-import { useUsers } from "@/hooks/useUsers";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { useUsers } from "@/hooks/useUsers";
 
-export default function AddEmployeeDialog({ open, onClose, initialData = null }) {
-    const { createNewEmployee, updateUser } = useUsers();
+export default function AdminDialog({ open, onClose, initialData = null }) {
+    const { createNewUser, updateUser } = useUsers();
     const [showPassword, setShowPassword] = useState(false);
+
+    const isEdit = Boolean(initialData);
 
     const {
         register,
@@ -32,17 +24,15 @@ export default function AddEmployeeDialog({ open, onClose, initialData = null })
         reset,
         formState: { errors },
     } = useForm({
-        resolver: zodResolver(employeeSchema),
         defaultValues: {
             name: "",
             email: "",
             phoneNo: "",
             password: "",
-            role: "employee",
+            role: "admin",
         },
     });
 
-    // initialize form for edit mode or reset for create
     useEffect(() => {
         if (initialData) {
             reset({
@@ -50,7 +40,7 @@ export default function AddEmployeeDialog({ open, onClose, initialData = null })
                 email: initialData.email || "",
                 phoneNo: initialData.phoneNo || "",
                 password: "",
-                role: initialData.role || "employee",
+                role: initialData.role || "admin",
             });
         } else {
             reset({
@@ -58,15 +48,14 @@ export default function AddEmployeeDialog({ open, onClose, initialData = null })
                 email: "",
                 phoneNo: "",
                 password: "",
-                role: "employee",
+                role: "admin",
             });
         }
     }, [initialData, open, reset]);
 
     const onSubmit = async (data) => {
         try {
-            if (initialData) {
-                // updateUser expects { data } shape — keep consistent with useUsers hook
+            if (isEdit) {
                 await updateUser.mutateAsync({
                     data: {
                         userId: initialData._id,
@@ -77,71 +66,65 @@ export default function AddEmployeeDialog({ open, onClose, initialData = null })
                 return;
             }
 
-            // Create flow
-            await createNewEmployee.mutateAsync({ data });
+            // create admin (force role)
+            await createNewUser.mutateAsync({
+                data: {
+                    ...data,
+                    role: "admin",
+                },
+            });
+
             onClose();
             reset();
-        } catch (error) {
-            console.error(error);
+        } catch (err) {
+            console.error(err);
         }
     };
 
-    const creating = createNewEmployee?.isPending;
+    const creating = createNewUser?.isPending;
     const updating = updateUser?.isPending;
 
     return (
-        <Dialog
-            open={!!open}
-            onClose={onClose}
-            fullWidth
-            maxWidth="sm"
-            aria-labelledby="add-employee-dialog"
-        >
-            <DialogTitle id="add-employee-dialog" className="flex items-center justify-between">
-                {initialData ? "Edit Employee" : "Create New Employee"}
-                <IconButton size="small" onClick={onClose} aria-label="close">
-                    <CloseIcon fontSize="small" />
-                </IconButton>
+        <Dialog open={!!open} onClose={onClose} fullWidth maxWidth="sm" aria-labelledby="add-admin-dialog">
+            <DialogTitle id="add-admin-dialog" className="flex items-center justify-between">
+                {isEdit ? "Edit Admin" : "Create New Admin"}
+                <IconButton size="small" onClick={onClose} aria-label="close"><CloseIcon fontSize="small" /></IconButton>
             </DialogTitle>
 
             <Box component="form" noValidate onSubmit={handleSubmit(onSubmit)}>
                 <DialogContent dividers>
-                    {/* Name */}
                     <FormControl fullWidth margin="normal" error={Boolean(errors.name)}>
-                        <TextField {...register("name")} label="Name" error={Boolean(errors.name)} />
+                        <TextField {...register("name", { required: "Name is required", minLength: { value: 2, message: "Minimum 2 characters" } })} label="Name" error={Boolean(errors.name)} />
                         {errors.name && <FormHelperText>{errors.name.message}</FormHelperText>}
                     </FormControl>
 
-                    {/* Email */}
                     <FormControl fullWidth margin="normal" error={Boolean(errors.email)}>
-                        <TextField {...register("email")} label="Email" error={Boolean(errors.email)} />
+                        <TextField {...register("email", {
+                            required: "Email is required",
+                            pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: "Invalid email address" }
+                        })} label="Email" error={Boolean(errors.email)} />
                         {errors.email && <FormHelperText>{errors.email.message}</FormHelperText>}
                     </FormControl>
 
-                    {/* Phone */}
                     <FormControl fullWidth margin="normal" error={Boolean(errors.phoneNo)}>
-                        <TextField {...register("phoneNo")} label="Phone No" error={Boolean(errors.phoneNo)} />
+                        <TextField {...register("phoneNo", {
+                            required: "Phone number is required",
+                            pattern: { value: /^\d{10}$/, message: "Phone number must be 10 digits" }
+                        })} label="Phone No" error={Boolean(errors.phoneNo)} />
                         {errors.phoneNo && <FormHelperText>{errors.phoneNo.message}</FormHelperText>}
                     </FormControl>
 
-                    {/* Password */}
                     {!initialData &&
                         <FormControl fullWidth margin="normal" error={Boolean(errors.password)}>
                             <TextField
-                                {...register("password")}
-                                label={initialData ? "Password (leave blank to keep current)" : "Password"}
-                                id="password"
+                                {...register("password", { required: "Password is required", minLength: { value: 6, message: "Minimum 6 characters" } })}
+                                label={isEdit ? "Password (leave blank to keep current)" : "Password"}
                                 type={showPassword ? "text" : "password"}
                                 error={Boolean(errors.password)}
                                 InputProps={{
                                     endAdornment: (
                                         <InputAdornment position="end">
-                                            <IconButton
-                                                aria-label={showPassword ? "hide the password" : "display the password"}
-                                                onClick={() => setShowPassword((s) => !s)}
-                                                edge="end"
-                                                size="small"
-                                            >
+                                            <IconButton onClick={() => setShowPassword((s) => !s)} edge="end" size="small">
                                                 {showPassword ? <VisibilityOff /> : <Visibility />}
                                             </IconButton>
                                         </InputAdornment>
@@ -152,8 +135,8 @@ export default function AddEmployeeDialog({ open, onClose, initialData = null })
                         </FormControl>
                     }
 
-                    {/* role (hidden) */}
                     <input type="hidden" {...register("role")} />
+                    <input type="hidden" {...register("type")} />
                 </DialogContent>
 
                 <DialogActions>
@@ -163,7 +146,7 @@ export default function AddEmployeeDialog({ open, onClose, initialData = null })
                         type="submit"
                         loading={creating || updating}
                     >
-                        {initialData ? "Save Changes" : "Save"}
+                        {isEdit ? "Save Changes" : "Save"}
                     </LoadingButton>
                 </DialogActions>
             </Box>

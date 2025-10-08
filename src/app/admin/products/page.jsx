@@ -1,10 +1,11 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import InnerDashboardLayout from '@/components/dashboard/InnerDashboardLayout'
 import { useProducts } from "@/hooks/useProducts";
 import ProductsTable from "./components/ProductsTable";
 import {
-    Button, Box, TextField, FormControl, InputLabel, Select, MenuItem
+    Button, Box, TextField, FormControl, InputLabel, Select, MenuItem,
+    Tooltip
 } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 import RefreshIcon from '@mui/icons-material/Refresh';
@@ -14,6 +15,7 @@ import Inventory2Icon from '@mui/icons-material/Inventory2';
 import BusinessIcon from '@mui/icons-material/Business';
 import PeopleIcon from '@mui/icons-material/People';
 import SearchIcon from '@mui/icons-material/Search';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import ProductDialog from "./components/ProductDialog";
 import ProductStockDrawer from "./components/ProductStockDrawer";
 
@@ -33,13 +35,53 @@ function ProductsPage() {
     const [drawerOpen, setDrawerOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
 
-    const productsData = productsQuery({ page, limit });
+    // Search: immediate input + debounced searchQuery (3000ms to match customers module)
+    const [searchInput, setSearchInput] = useState("");
+    const [searchQuery, setSearchQuery] = useState("");
+
+    // Status filter state
+    const [status, setStatus] = useState("");
+
+    useEffect(() => {
+        const t = setTimeout(() => {
+            setPage(1);
+            setSearchQuery(searchInput.trim());
+        }, 3000);
+
+        return () => clearTimeout(t);
+    }, [searchInput]);
+
+    useEffect(() => {
+        setPage(1);
+    }, [status]);
+
+    const queryParams = useMemo(() => ({
+        page,
+        limit,
+        ...(searchQuery ? { searchQuery } : {}),
+        ...(status ? { status } : {}),
+    }), [page, limit, searchQuery, status]);
+
+    const productsData = productsQuery(queryParams);
 
     if (productsData.isError) {
         return <div>Error: {productsData.error?.message || "Failed to load Products"}</div>;
     }
 
-    const apiData = productsData?.data?.data?.data || {};
+    const apiData = productsData?.data?.data?.data || {
+        products: [],
+        pagination: { page: 1, limit },
+        totalCount: 0,
+    };
+
+    // Reset filters handler
+    const handleResetFilters = () => {
+        setSearchInput("");
+        setSearchQuery("");
+        setStatus("");
+        setPage(1);
+        productsData.refetch && productsData.refetch();
+    };
 
     const StatCard = ({ title, value, Icon, color }) => (
         <div className="bg-white border border-gray-300 rounded-xl px-5 py-8 flex justify-between items-center hover:border-gray-300 duration-200 ease-in-out transition">
@@ -62,29 +104,50 @@ function ProductsPage() {
                     <p className="text-gray-500 text-base">Manage all products — add new products, update stock and pricing.</p>
                 </div>
                 <div className="flex gap-3">
-                    <Button variant="outlined">
-                        <RefreshIcon />
-                    </Button>
-                    <Button variant="outlined">
-                        <ArrowDownwardIcon />
-                    </Button>
-                    <Button
-                        variant="outlined"
-                        startIcon={<AddIcon />}
-                        sx={{ textTransform: "capitalize" }}
-                        onClick={() => setDialogOpen(true)}
-                    >
-                        Add Product
-                    </Button>
+                    <Tooltip title="Refresh" arrow>
+                        <span>
+                            <Button
+                                variant="outlined"
+                                onClick={() => productsData.refetch && productsData.refetch()}
+                                aria-label="Refresh"
+                                disabled={!!productsData.isRefetching}
+                                loading={!!productsData.isRefetching}
+                            >
+                              <RefreshIcon />
+                            </Button>
+                        </span>
+                    </Tooltip>
+
+                    <Tooltip title="Download" arrow>
+                        <span>
+                            <Button variant="outlined" onClick={() => { /* TODO: download CSV */ }}>
+                                <ArrowDownwardIcon />
+                            </Button>
+                        </span>
+                    </Tooltip>
+
+                    <Tooltip title="Add product" arrow>
+                        <span>
+                            <Button
+                                variant="outlined"
+                                startIcon={<AddIcon />}
+                                sx={{ textTransform: "capitalize" }}
+                                onClick={() => setDialogOpen(true)}
+                                aria-label="Add Product"
+                            >
+                                Add Product
+                            </Button>
+                        </span>
+                    </Tooltip>
                 </div>
             </div>
 
             {/* Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-5 w-full mb-6">
-                <StatCard title="Products" value={demo.totalProducts} Icon={Inventory2Icon} color="#fff" />
-                <StatCard title="Sales (Aug 2025)" value={demo.salesAug2025} Icon={MonetizationOnIcon} color="#fff" />
-                <StatCard title="Brands" value={demo.brands} Icon={BusinessIcon} color="#fff" />
-                <StatCard title="Customers" value={demo.customers} Icon={PeopleIcon} color="#fff" />
+                <StatCard title="Products" value={demo.totalProducts} Icon={Inventory2Icon} color="#ffffff" />
+                <StatCard title="Sales (Aug 2025)" value={demo.salesAug2025} Icon={MonetizationOnIcon} color="#ffffff" />
+                <StatCard title="Brands" value={demo.brands} Icon={BusinessIcon} color="#ffffff" />
+                <StatCard title="Customers" value={demo.customers} Icon={PeopleIcon} color="#ffffff" />
             </div>
 
             {/* Table Section */}
@@ -98,31 +161,44 @@ function ProductsPage() {
 
                 {/* Search + Filters */}
                 <div className="mb-4 flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-                    <Box className="flex-1" sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                    <Box className="flex-1" sx={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                        <Box sx={{ position: 'absolute', left: 12, pointerEvents: 'none', color: '#9CA3AF' }}>
+                            <SearchIcon />
+                        </Box>
+
                         <TextField
                             variant="outlined"
-                            placeholder="Search products, IDs, names..."
+                            placeholder="Search products, name, sku..."
                             size="small"
                             fullWidth
-                            sx={{ "& .MuiOutlinedInput-root": { borderRadius: "7px" } }}
-                            slotProps={{
-                                startAdornment: <SearchIcon style={{ marginRight: 4, color: '#9CA3AF' }} />,
+                            value={searchInput}
+                            onChange={(e) => setSearchInput(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                    setSearchQuery(searchInput.trim());
+                                    setPage(1);
+                                }
+                            }}
+                            InputProps={{ style: { paddingLeft: 44 } }}
+                            sx={{
+                                "& .MuiOutlinedInput-root": { borderRadius: "7px", minHeight: 40 }
                             }}
                         />
                     </Box>
 
                     <Box sx={{ minWidth: 180 }}>
                         <FormControl
-                            sx={{ "& .MuiOutlinedInput-root": { borderRadius: "7px" } }}
                             fullWidth
                             variant="outlined"
                             size="small"
+                            sx={{ "& .MuiOutlinedInput-root": { borderRadius: "7px" } }}
                         >
                             <InputLabel id="status-filter-label">Status</InputLabel>
                             <Select
                                 labelId="status-filter-label"
                                 label="Status"
-                                defaultValue=""
+                                value={status}
+                                onChange={(e) => setStatus(e.target.value)}
                             >
                                 <MenuItem value="">All</MenuItem>
                                 <MenuItem value="active">Active</MenuItem>
@@ -130,6 +206,19 @@ function ProductsPage() {
                             </Select>
                         </FormControl>
                     </Box>
+
+                    {/* Reset filters */}
+                    <Tooltip title="Reset filters" arrow>
+                        <span>
+                            <Button
+                                variant="outlined"
+                                onClick={handleResetFilters}
+                                aria-label="Reset Filters"
+                            >
+                                <RestartAltIcon />
+                            </Button>
+                        </span>
+                    </Tooltip>
                 </div>
 
                 <ProductsTable

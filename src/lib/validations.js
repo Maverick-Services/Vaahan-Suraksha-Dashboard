@@ -24,7 +24,8 @@ export const employeeSchema = z.object({
         .min(10, "Phone number must be at least 10 digits")
         .max(10, "Phone number must be at most 10 digits")
         .regex(/^\d+$/, "Phone number must contain only digits"),
-    password: z.string().min(6, 'Please enter a valid password.'),
+    // password: z.string().min(6, 'Please enter a valid password.'),
+    password: z.string().optional(),
     role: z.enum(['employee']).default('employee')
     // active: z.boolean().default(true),
 });
@@ -38,7 +39,8 @@ export const companySchema = z.object({
         .min(10, "Phone number must be at least 10 digits")
         .max(10, "Phone number must be at most 10 digits")
         .regex(/^\d+$/, "Phone number must contain only digits"),
-    password: z.string().min(6, 'Please enter a valid password.'),
+    // password: z.string().min(6, 'Please enter a valid password.'),
+    password: z.string().optional(),
     role: z.enum(['company']).default('company')
     // active: z.boolean().default(true),
 });
@@ -52,25 +54,32 @@ export const riderSchema = z.object({
         .min(10, "Phone number must be at least 10 digits")
         .max(10, "Phone number must be at most 10 digits")
         .regex(/^\d+$/, "Phone number must contain only digits"),
-    password: z.string().min(6, 'Please enter a valid password.'),
+    password: z.string().optional(),
+    // password: z.string().min(6, 'Please enter a valid password.'),
     role: z.enum(['rider']).default('rider')
     // active: z.boolean().default(true),
 });
 
-// User Schema
-export const userSchema = z.object({
+// Create customer (password required)
+export const createUserSchema = z.object({
     name: z.string().min(2, "User Name is required."),
-    email: z.string().email('Invalid email address').min(1, 'Email is required'),
-    phoneNo: z
-        .string()
-        .min(10, "Phone number must be at least 10 digits")
-        .max(10, "Phone number must be at most 10 digits")
-        .regex(/^\d+$/, "Phone number must contain only digits"),
-    password: z.string().min(6, 'Please enter a valid password.'),
-    role: z.enum(['user']).default('user'),
-    type: z.enum(['b2c']).default('b2c')
-    // active: z.boolean().default(true),
+    email: z.string().email("Invalid email address").min(1, "Email is required"),
+    phoneNo: z.string().min(10, "Phone number must be at least 10 digits").max(10, "Phone number must be at most 10 digits").regex(/^\d+$/, "Phone number must contain only digits"),
+    password: z.string().min(6, "Please enter a valid password."),
+    role: z.enum(["user"]).default("user"),
+    type: z.enum(["b2c"]).default("b2c"),
 });
+
+// Update customer (password optional)
+export const updateUserSchema = z.object({
+    name: z.string().min(2, "User Name is required."),
+    email: z.string().email("Invalid email address").min(1, "Email is required"),
+    phoneNo: z.string().min(10, "Phone number must be at least 10 digits").max(10, "Phone number must be at most 10 digits").regex(/^\d+$/, "Phone number must contain only digits"),
+    password: z.preprocess((v) => (v === "" ? undefined : v), z.string().min(6, "Please enter a valid password").optional()).optional(),
+    role: z.enum(["user"]).default("user"),
+    type: z.enum(["b2c"]).default("b2c"),
+});
+
 
 // Car Model Schema
 export const carModelSchema = z.object({
@@ -114,15 +123,21 @@ export const productSchema = z.object({
 
 // product stock schema
 export const stockSchema = z.object({
-  vendor: z.string().optional().nullable(),
-  purchasePrice: z.preprocess((v) => {
-    if (v === "" || v === null || v === undefined) return undefined;
-    return Number(v);
-  }, z.number().nonnegative("Purchase price cannot be negative").optional()),
-  quantity: z.preprocess((v) => {
-    // coerce numeric strings to number
-    if (typeof v === "string" && v.trim() === "") return undefined;
-    if (typeof v === "string" && !isNaN(Number(v))) return Number(v);
-    return v;
-  }, z.number().int("Quantity must be an integer").positive("Quantity must be greater than 0")),
+    vendor: z.string().optional().nullable(),
+    purchasePrice: z
+        .preprocess((v) => (v === "" ? undefined : Number(v)), z.number().nonnegative().default(0))
+        .optional(),
+    quantity: z.preprocess(
+        (v) => {
+            if (v === "" || v === null || v === undefined) return 0;
+            if (typeof v === "string" && !isNaN(Number(v))) return Number(v);
+            return v;
+        },
+        z
+            .number({
+                required_error: "Quantity is required",
+                invalid_type_error: "Quantity must be a number",
+            })
+            .refine((val) => val !== 0, { message: "Quantity cannot be zero" })
+    ),
 });

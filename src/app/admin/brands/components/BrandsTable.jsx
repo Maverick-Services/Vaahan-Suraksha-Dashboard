@@ -3,8 +3,7 @@ import React, { useState } from "react";
 import {
     Table, TableBody, TableCell, TableContainer,
     TableHead, TableRow, IconButton, Menu, MenuItem,
-    TablePagination,
-    Chip
+    TablePagination, Chip
 } from "@mui/material";
 import Switch from "@mui/material/Switch";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -14,8 +13,6 @@ import TableSkeleton2 from "@/components/shared/TableSkeleton2";
 export default function BrandsTable({ apiData, onPageChange, limit, setLimit, dataLoading, onEdit }) {
     const [anchorEl, setAnchorEl] = useState(null);
     const [menuRow, setMenuRow] = useState(null);
-
-    console.log(apiData)
 
     const handleMenuOpen = (event, row) => {
         setAnchorEl(event.currentTarget);
@@ -27,8 +24,11 @@ export default function BrandsTable({ apiData, onPageChange, limit, setLimit, da
         setMenuRow(null);
     };
 
+    const page = apiData?.pagination?.page || 1;
+    const pageLimit = apiData?.pagination?.limit || limit || 25;
+
     return (
-        <div className="bg-white border border-gray-200">
+        <div >
             <TableContainer>
                 <Table stickyHeader>
                     <TableHead>
@@ -45,69 +45,76 @@ export default function BrandsTable({ apiData, onPageChange, limit, setLimit, da
                     {dataLoading
                         ? <TableSkeleton2 rows={6} columns={6} />
                         : <TableBody>
-                            {apiData?.brands?.map((brand, index) => (
-                                <TableRow hover key={brand._id}>
-                                    <TableCell>{(apiData?.pagination.page - 1) * apiData?.pagination.limit + index + 1}</TableCell>
-                                    <TableCell>
-                                        <div>
-                                            <Image
-                                                src={brand?.image || '/brand.png'}
-                                                alt="brand"
-                                                height={100}
-                                                width={100}
+                            {Array.isArray(apiData?.brands) && apiData.brands.length > 0 ? (
+                                apiData.brands.map((brand, index) => (
+                                    <TableRow hover key={brand._id}>
+                                        <TableCell>{(page - 1) * pageLimit + index + 1}</TableCell>
+
+                                        <TableCell>
+                                            <div className="flex items-center">
+                                                <Image
+                                                    src={brand?.image || '/brand.png'}
+                                                    alt={brand?.name || "brand"}
+                                                    height={48}
+                                                    width={48}
+                                                    className="rounded"
+                                                />
+                                            </div>
+                                        </TableCell>
+
+                                        <TableCell>{brand.name}</TableCell>
+                                        <TableCell>
+                                            <Switch
+                                                checked={Boolean(brand.active)}
+                                                onChange={(e) => {
+                                                    console.log("Toggled", brand._id, e.target.checked);
+                                                    // optional: call updateBrand mutation for optimistic update
+                                                }}
+                                                color="primary"
                                             />
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>{brand.name}</TableCell>
-                                    <TableCell>
-                                        <Switch
-                                            checked={brand.active}
-                                            onChange={(e) => {
-                                                console.log("Toggled", brand._id, e.target.checked);
-                                                // you can call an API here to update status
-                                            }}
-                                            color="primary"
-                                        />
-                                    </TableCell>
+                                        </TableCell>
 
-                                    <TableCell>
-                                        <div className="flex flex-wrap max-w-80 gap-1">
-                                            {brand?.car_models?.map((cm, idx) => (
-                                                <Chip key={idx} label={cm?.name} />
-                                            ))}
-                                        </div>
-                                    </TableCell>
+                                        <TableCell>
+                                            <div className="flex flex-wrap gap-1">
+                                                {Array.isArray(brand?.car_models) && brand.car_models.length > 0 ? (
+                                                    brand.car_models.map((cm, idx) => <Chip key={cm?._id ?? idx} label={cm?.name || "-"} />)
+                                                ) : (
+                                                    <span className="text-gray-500 text-sm">—</span>
+                                                )}
+                                            </div>
+                                        </TableCell>
 
-                                    <TableCell align="right">
-                                        <IconButton
-                                            size="small"
-                                            onClick={(e) => handleMenuOpen(e, brand)}
-                                        >
-                                            <MoreVertIcon />
-                                        </IconButton>
-                                    </TableCell>
+                                        <TableCell align="right">
+                                            <IconButton size="small" onClick={(e) => handleMenuOpen(e, brand)}>
+                                                <MoreVertIcon />
+                                            </IconButton>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={6} align="center">No brands found.</TableCell>
                                 </TableRow>
-                            ))}
+                            )}
                         </TableBody>
                     }
                 </Table>
             </TableContainer>
 
-            {/* Pagination */}
             <TablePagination
                 component="div"
                 count={apiData?.totalCount || 0}
-                page={apiData?.pagination?.page - 1 || 0}
+                page={page - 1}
                 onPageChange={(e, newPage) => onPageChange(newPage + 1)}
-                rowsPerPage={limit || 0}
+                rowsPerPage={pageLimit}
                 onRowsPerPageChange={(e) => {
-                    setLimit(parseInt(e.target.value, 10));
+                    const v = parseInt(e.target.value, 10);
+                    setLimit && setLimit(v);
                     onPageChange(1);
                 }}
                 rowsPerPageOptions={[5, 10, 25, 50]}
             />
 
-            {/* Menu */}
             <Menu
                 anchorEl={anchorEl}
                 open={Boolean(anchorEl)}
@@ -117,7 +124,6 @@ export default function BrandsTable({ apiData, onPageChange, limit, setLimit, da
                 <MenuItem onClick={() => { handleMenuClose(); onEdit && onEdit(menuRow); }}>Edit</MenuItem>
                 <MenuItem onClick={() => { console.log("Delete", menuRow); handleMenuClose(); }}>Delete</MenuItem>
             </Menu>
-
         </div>
     );
 }

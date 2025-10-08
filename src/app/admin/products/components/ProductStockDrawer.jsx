@@ -24,7 +24,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useProducts } from "@/hooks/useProducts";
 import { formatDateWithTime } from "@/lib/services/dateFormat";
-import { stockSchema } from "@/lib/validations"; 
+import { stockSchema } from "@/lib/validations";
 
 export default function ProductStockDrawer({ open, onClose, product }) {
   const { updateStock } = useProducts();
@@ -61,6 +61,7 @@ export default function ProductStockDrawer({ open, onClose, product }) {
     try {
       await updateStock.mutateAsync({ productId: product._id, data: payload });
       reset();
+      onClose();
     } catch (err) {
       console.error("Failed to update stock", err);
     }
@@ -109,7 +110,7 @@ export default function ProductStockDrawer({ open, onClose, product }) {
                 size="small"
                 type="number"
                 inputProps={{ min: 0, step: "0.01" }}
-                {...register("purchasePrice", { valueAsNumber: true })}
+                {...register("purchasePrice")}
                 error={Boolean(errors.purchasePrice)}
               />
               {errors.purchasePrice && <FormHelperText error>{errors.purchasePrice?.message}</FormHelperText>}
@@ -120,8 +121,8 @@ export default function ProductStockDrawer({ open, onClose, product }) {
                 label="Quantity *"
                 size="small"
                 type="number"
-                inputProps={{ min: 1, step: "1" }}
-                {...register("quantity", { valueAsNumber: true })}
+                inputProps={{ step: "1" }}
+                {...register("quantity")}
                 error={Boolean(errors.quantity)}
               />
               {errors.quantity && <FormHelperText error>{errors.quantity?.message}</FormHelperText>}

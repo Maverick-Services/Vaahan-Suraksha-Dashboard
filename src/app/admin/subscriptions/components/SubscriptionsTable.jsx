@@ -2,15 +2,16 @@
 import React, { useState } from "react";
 import {
     Table, TableBody, TableCell, TableContainer,
-    TableHead, TableRow, Paper, IconButton, Menu, MenuItem,
-    TablePagination,
-    Chip
+    TableHead, TableRow, IconButton, Menu, MenuItem,
+    TablePagination, Chip
 } from "@mui/material";
 import Switch from "@mui/material/Switch";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Image from "next/image";
+import TableSkeleton2 from "@/components/shared/TableSkeleton2";
 
-export default function SubscriptionsTable({ apiData, onPageChange }) {
+export default function SubscriptionsTable({ apiData, onPageChange, limit, setLimit, dataLoading, onEdit, onAddStock }) {
+    console.log(apiData)
     const [anchorEl, setAnchorEl] = useState(null);
     const [menuRow, setMenuRow] = useState(null);
 
@@ -24,10 +25,8 @@ export default function SubscriptionsTable({ apiData, onPageChange }) {
         setMenuRow(null);
     };
 
-    console.log(apiData)
-
     return (
-        <Paper sx={{ width: "100%", overflow: "hidden" }}>
+        <div>
             <TableContainer>
                 <Table stickyHeader>
                     <TableHead>
@@ -41,68 +40,66 @@ export default function SubscriptionsTable({ apiData, onPageChange }) {
                             <TableCell align="right">Actions</TableCell>
                         </TableRow>
                     </TableHead>
-
-                    <TableBody>
-                        {apiData?.subscriptions?.map((s, index) => (
-                            <TableRow hover key={s?._id}>
-                                <TableCell>{(apiData?.pagination.page - 1) * apiData?.pagination.limit + index + 1}</TableCell>
-                                <TableCell>{s?.name}</TableCell>
-                                <TableCell>{s?.currentSubscribers?.length}</TableCell>
-                                <TableCell>{s?.duration} {s?.durationUnit}</TableCell>
-                                <TableCell>{s?.limit}</TableCell>
-                                <TableCell>
-                                    <Switch
-                                        checked={s?.active}
-                                        onChange={(e) => {
-                                            console.log("Toggled", s?._id, e.target.checked);
-                                            // you can call an API here to update status
-                                        }}
-                                        color="primary"
-                                    />
-                                </TableCell>
-
-                                {/* <TableCell>
-                                    <div className="flex flex-wrap max-w-80 gap-1">
-                                        {s?.car_models?.map((cm, idx) => (
-                                            <Chip key={idx} label={cm?.name} />
-                                        ))}
-                                    </div>
-                                </TableCell> */}
-
-                                <TableCell align="right">
-                                    <IconButton
-                                        size="small"
-                                        onClick={(e) => handleMenuOpen(e, s)}
-                                    >
-                                        <MoreVertIcon />
-                                    </IconButton>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
+                    {dataLoading
+                        ? <TableSkeleton2 rows={6} columns={8} />
+                        : <TableBody>
+                            {apiData?.subscriptions?.map((s, index) => (
+                                <TableRow hover key={s?._id}>
+                                    <TableCell>{(apiData?.pagination.page - 1) * apiData?.pagination.limit + index + 1}</TableCell>
+                                    <TableCell>
+                                        <div>
+                                            <h4>{s?.name}</h4>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Chip label={Array.isArray(s?.currentSubscribers) ? s.currentSubscribers.length : (s?.currentSubscribers ?? 0)} />
+                                    </TableCell>
+                                    <TableCell>{s?.duration} {s?.durationUnit}</TableCell>
+                                    <TableCell>
+                                        <Chip label={s?.limit} />
+                                    </TableCell>
+                                    <TableCell>
+                                        <Switch
+                                            checked={s?.active}
+                                            onChange={(e) => {
+                                                console.log("Toggled", s?._id, e.target.checked);
+                                                // API call to toggle active status
+                                            }}
+                                            color="primary"
+                                        />
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        <IconButton size="small" onClick={(e) => handleMenuOpen(e, s)}>
+                                            <MoreVertIcon />
+                                        </IconButton>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    }
                 </Table>
             </TableContainer>
 
             {/* Pagination */}
             <TablePagination
                 component="div"
-                count={apiData?.totalCount}
-                page={apiData?.pagination.page - 1}
+                count={apiData?.totalCount || 0}
+                page={apiData?.pagination?.page - 1 || 0}
                 onPageChange={(e, newPage) => onPageChange(newPage + 1)}
-                rowsPerPage={apiData?.pagination.limit}
-                rowsPerPageOptions={[5, 10, 25]}
+                rowsPerPage={limit || 0}
+                onRowsPerPageChange={(e) => {
+                    setLimit(parseInt(e.target.value, 10));
+                    onPageChange(1);
+                }}
+                rowsPerPageOptions={[5, 10, 25, 50]}
             />
 
             {/* Menu */}
-            <Menu
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleMenuClose}
-            >
+            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
                 <MenuItem onClick={() => { console.log("View", menuRow); handleMenuClose(); }}>View</MenuItem>
-                <MenuItem onClick={() => { console.log("Edit", menuRow); handleMenuClose(); }}>Edit</MenuItem>
-                <MenuItem onClick={() => { console.log("Delete", menuRow); handleMenuClose(); }}>Delete</MenuItem>
+                <MenuItem onClick={() => { console.log("Edit", menuRow); onEdit && onEdit(menuRow); handleMenuClose(); }}>Edit</MenuItem>
+                <MenuItem onClick={() => { console.log("Add Stock", menuRow); onAddStock && onAddStock(menuRow); handleMenuClose(); }}>Add Stock</MenuItem>
             </Menu>
-        </Paper>
+        </div>
     );
 }
