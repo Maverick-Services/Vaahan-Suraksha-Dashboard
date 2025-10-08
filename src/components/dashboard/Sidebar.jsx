@@ -69,6 +69,7 @@ export default function Sidebar({ variant = 'permanent', open = true, onClose })
         { label: 'Car Models', icon: <CarIcon />, path: '/admin/carModels' },
         { label: 'Products', icon: <ProductIcon />, path: '/admin/products' },
         { label: 'Services', icon: <ServiceIcon />, path: '/admin/services' },
+        { label: 'One Time Plans', icon: <SubscriptionIcon />, path: '/admin/oneTimePlans' },
         { label: 'Subscriptions', icon: <SubscriptionIcon />, path: '/admin/subscriptions' },
         { label: 'Settings', icon: <SettingsIcon />, path: '/admin/settings' },
     ]

@@ -141,3 +141,12 @@ export const stockSchema = z.object({
             .refine((val) => val !== 0, { message: "Quantity cannot be zero" })
     ),
 });
+
+
+// One-time Plan Schema
+export const oneTimePlanSchema = z.object({
+  name: z.string().min(2, "Plan name is required."),
+  services: z.array(z.any()).optional().default([]), 
+  pricing: z.record(z.any()).optional().default({}),
+  active: z.boolean().default(true),
+});
